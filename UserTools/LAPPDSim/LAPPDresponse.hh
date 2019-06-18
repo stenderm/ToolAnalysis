@@ -19,6 +19,8 @@ class LAPPDresponse {
 
   ~LAPPDresponse();
 
+  void Initialise(TFile* tf);
+
   void AddSinglePhotonTrace(double trans, double para, double time);
 
   Waveform<double> GetTrace(int CHnumber, double starttime, double samplesize, int numsamples, double thenoise);

@@ -22,6 +22,7 @@
 #include "SaveANNIEEvent/SaveANNIEEvent.cpp"
 #include "LAPPDSim/LAPPDSim.cpp"
 #include "LAPPDSim/LAPPDresponse.cpp"
+#include "LAPPDSim/LAPPDDisplay.cpp"
 #include "BeamTimeAna/BeamTimeAna.cpp"
 #include "BeamTimeTreeMaker/BeamTimeTreeMaker.cpp"
 #include "BeamTimeTreeReader/BeamTimeTreeReader.cpp"
@@ -89,4 +90,4 @@
 #include "TotalLightMap/TotalLightMap.cpp"
 #include "MrdDiscriminatorScan/MrdDiscriminatorScan.cpp"
 #include "MCRecoEventLoader/MCRecoEventLoader.cpp"
-
+#include "LoadGeometry/LoadGeometry.cpp"
