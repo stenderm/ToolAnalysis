@@ -130,6 +130,7 @@ void LAPPDDisplay::MCTruthDrawing(int eventNumber, unsigned long actualTubeNo, v
 
 		LAPPDMCHits->GetXaxis()->SetTitle("Transverse coordinate [m]");
 		LAPPDMCHits->GetYaxis()->SetTitle("Parallel coordinate [m]");
+		LAPPDTrans->GetYaxis()->SetTitleOffset(1.4);
 		LAPPDMCHits->GetZaxis()->SetTitle("Arrival time [ns]");
 		LAPPDMCHits->GetZaxis()->SetTitleOffset(1.4);
 		LAPPDMCHits->Write();
