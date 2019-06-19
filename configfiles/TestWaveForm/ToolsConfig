@@ -1,0 +1,4 @@
+myLoadWCSim LoadWCSim configfiles/TestWaveForm/LoadWCSimConfig
+myLoadWCSimLAPPD LoadWCSimLAPPD configfiles/TestWaveForm/LoadWCSimLAPPDConfig
+myLAPPDSim LAPPDSim configfiles/TestWaveForm/ConfigVarsPSEC4
+myTestWaveForm TestWaveForm configfiles/TestWaveForm/TestWaveFormConfig

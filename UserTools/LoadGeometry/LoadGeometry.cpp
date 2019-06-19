@@ -22,9 +22,9 @@ bool LoadGeometry::Initialise(std::string configfile, DataModel &data){
   m_variables.Get("LAPPDGeoFile", fLAPPDGeoFile);
   m_variables.Get("DetectorGeoFile", fDetectorGeoFile);
 
-  //Check files exist 
+  //Check files exist
   if(!this->FileExists(fDetectorGeoFile)){
-		Log("LoadGeometry Tool: File for Detector Geometry does not exist!",v_error,verbosity); 
+		Log("LoadGeometry Tool: File for Detector Geometry does not exist!",v_error,verbosity);
         std::cout << "Filepath was... " << fDetectorGeoFile << std::endl;
 		return false;
   }
@@ -33,15 +33,20 @@ bool LoadGeometry::Initialise(std::string configfile, DataModel &data){
         std::cout << "Filepath was... " << fFACCMRDGeoFile << std::endl;
 		return false;
   }
+  if(!this->FileExists(fLAPPDGeoFile)){
+		Log("LoadGeometry Tool: File for LAPPD Geometry does not exist!",v_error,verbosity);
+        std::cout << "Filepath was... " << fLAPPDGeoFile << std::endl;
+		return false;
+  }
 
-  //Initialize the geometry using the geometry CSV file entries 
+  //Initialize the geometry using the geometry CSV file entries
   this->InitializeGeometry();
 
   //Load MRD Geometry Detector/Channel Information
   this->LoadFACCMRDDetectors();
 
   m_data->Stores.at("ANNIEEvent")->Header->Set("AnnieGeometry",AnnieGeometry,true);
-  
+
   return true;
 }
 
@@ -62,17 +67,17 @@ void LoadGeometry::InitializeGeometry(){
   //Get the Detector file data key
   std::string DetectorLegend = this->GetLegendLine(fDetectorGeoFile);
   std::vector<std::string> DetectorLegendEntries;
-  boost::split(DetectorLegendEntries,DetectorLegend, boost::is_any_of(","), boost::token_compress_on); 
- 
-  //Initialize at zero; will be set later after channels are loaded 
+  boost::split(DetectorLegendEntries,DetectorLegend, boost::is_any_of(","), boost::token_compress_on);
+
+  //Initialize at zero; will be set later after channels are loaded
   int numtankpmts = 0;
   int numlappds = 0;
-  int nummrdpmts = 0; 
+  int nummrdpmts = 0;
   int numvetopmts = 0;
 
   //Initialize data that will be fed to Geometry (units in meters)
   int geometry_version;
-  double tank_xcenter,tank_ycenter,tank_zcenter; 
+  double tank_xcenter,tank_ycenter,tank_zcenter;
   double tank_radius,tank_halfheight, pmt_enclosed_radius, pmt_enclosed_halfheight;
   double mrd_width,mrd_height,mrd_depth,mrd_start;
 
@@ -90,7 +95,7 @@ void LoadGeometry::InitializeGeometry(){
       if(line.find("#")!=std::string::npos) continue;
       if(line.find(DataEndLineLabel)!=std::string::npos) break;
       std::vector<std::string> DataEntries;
-      boost::split(DataEntries,line, boost::is_any_of(","), boost::token_compress_on); 
+      boost::split(DataEntries,line, boost::is_any_of(","), boost::token_compress_on);
       for (int i=0; i<DataEntries.size(); i++){
         //Check Legend at i, load correct data type
         int ivalue;
@@ -109,7 +114,7 @@ void LoadGeometry::InitializeGeometry(){
         if (DetectorLegendEntries.at(i) == "mrd_height") mrd_height = dvalue;
         if (DetectorLegendEntries.at(i) == "mrd_depth") mrd_depth = dvalue;
         if (DetectorLegendEntries.at(i) == "mrd_start") mrd_start = dvalue;
-      } 
+      }
     }
     Position tank_center(tank_xcenter, tank_ycenter, tank_zcenter);
     // Initialize the Geometry
@@ -139,8 +144,8 @@ void LoadGeometry::LoadFACCMRDDetectors(){
   Log("LoadGeometry tool: Now loading FACC/MRD detectors",v_message,verbosity);
   std::string MRDLegend = this->GetLegendLine(fFACCMRDGeoFile);
   std::vector<std::string> MRDLegendEntries;
-  boost::split(MRDLegendEntries,MRDLegend, boost::is_any_of(","), boost::token_compress_on); 
- 
+  boost::split(MRDLegendEntries,MRDLegend, boost::is_any_of(","), boost::token_compress_on);
+
   std::string line;
   ifstream myfile(fFACCMRDGeoFile.c_str());
   if (myfile.is_open()){
@@ -149,13 +154,13 @@ void LoadGeometry::LoadFACCMRDDetectors(){
       if(line.find("#")!=std::string::npos) continue;
       if(line.find(DataStartLineLabel)!=std::string::npos) break;
     }
-    //Loop over lines, collect all detector specs 
+    //Loop over lines, collect all detector specs
     while(getline(myfile,line)){
       std::cout << line << std::endl; //has our stuff;
       if(line.find("#")!=std::string::npos) continue;
       if(line.find(DataEndLineLabel)!=std::string::npos) break;
       std::vector<std::string> SpecLine;
-      boost::split(SpecLine,line, boost::is_any_of(","), boost::token_compress_on); 
+      boost::split(SpecLine,line, boost::is_any_of(","), boost::token_compress_on);
       if(verbosity>4) std::cout << "This line of data: " << line << std::endl;
       //Parse data line, make corresponding detector/channel
       Detector FACCMRDDetector = this->ParseMRDDataEntry(SpecLine,MRDLegendEntries);
@@ -167,6 +172,11 @@ void LoadGeometry::LoadFACCMRDDetectors(){
   if(myfile.is_open()) myfile.close();
     Log("LoadGeometry tool: FACC/MRD Detector/Channel loading complete",v_message,verbosity);
 }
+
+// void LoadGeometry::LoadLAPPDs(){
+//   Log("LoadGeometry tool: Now loading LAPPDs",v_message,verbosity);
+//
+// }
 
 Detector LoadGeometry::ParseMRDDataEntry(std::vector<std::string> SpecLine,
         std::vector<std::string> MRDLegendEntries){
@@ -235,7 +245,7 @@ Detector LoadGeometry::ParseMRDDataEntry(std::vector<std::string> SpecLine,
     if (MRDLegendEntries.at(i) == "PMT_type") PMT_type = svalue;
     if (MRDLegendEntries.at(i) == "paddle_label") paddle_label = svalue;
     if (MRDLegendEntries.at(i) == "cable_label") cable_label = svalue;
-  } 
+  }
 
   //FIXME Need the direction of the MRD PMT
   //FIXME Do we want the Paddle's center position?  Or PMT?
@@ -275,7 +285,7 @@ Detector LoadGeometry::ParseMRDDataEntry(std::vector<std::string> SpecLine,
                       hv_slot,
                       hv_channel,
                       channelstatus::ON);
-  
+
   // Add this channel to the geometry
   if(verbosity>4) cout<<"Adding channel "<<channel_num<<" to detector "<<detector_num<<endl;
   adet.AddChannel(pmtchannel);
@@ -315,4 +325,3 @@ std::string LoadGeometry::GetLegendLine(std::string name) {
   myfile.close();
   return legendline;
 }
-

@@ -34,7 +34,7 @@ bool LAPPDSim::Initialise(std::string configfile, DataModel &data)
 
 	// here I would also store relevant geometry information
 
-	m_data->Stores["ANNIEEvent"] = new BoostStore(false, 2);
+	//m_data->Stores["ANNIEEvent"] = new BoostStore(false, 2);
 
 // This quantity should be set to false if we are working with real data later
 	//bool isSim = true;
@@ -58,8 +58,9 @@ bool LAPPDSim::Execute()
 {
 	std::cout << "Executing LAPPDSim; event counter " << _event_counter << std::endl;
 
-	std::map<unsigned long, vector<Waveform<double>>> RawLAPPDData;
-	std::map<unsigned long, Waveform<double> > LAPPDWaveforms;
+	//std::map<unsigned long, vector<Waveform<double>>> RawLAPPDData;
+	LAPPDWaveforms = new std::map<unsigned long, Waveform<double> >;
+	LAPPDWaveforms->clear();
 
 	if (iter % 100 == 0)
 		cout << "iteration: " << iter << endl;
@@ -125,7 +126,7 @@ bool LAPPDSim::Execute()
 			}
 			Waveform<double> awav = response.GetTrace(i, 0.0, 100, 256, 1.0);
 			Vwavs.push_back(awav);
-			RawLAPPDData.insert(pair<unsigned long, vector<Waveform<double>>>(actualTubeNo, Vwavs));
+			//RawLAPPDData.insert(pair<unsigned long, vector<Waveform<double>>>(actualTubeNo, Vwavs));
 		}
 
 		std::map<unsigned long, Channel>* lappdchannel = thelappd->GetChannels();
@@ -142,10 +143,10 @@ bool LAPPDSim::Execute()
 //			    std::cout << "Stripside " << achannel.GetStripSide() << std::endl;
 			if (achannel.GetStripSide() == 0)
 			{
-				LAPPDWaveforms.insert(pair<unsigned long, Waveform<double>>(achannel.GetChannelID(), Vwavs[achannel.GetStripNum()]));
+				LAPPDWaveforms->insert(pair<unsigned long, Waveform<double>>(achannel.GetChannelID(), Vwavs[achannel.GetStripNum()]));
 			} else
 			{
-				LAPPDWaveforms.insert(pair<unsigned long, Waveform<double>>(achannel.GetChannelID(), Vwavs[numberOfLAPPDChannels - achannel.GetStripNum() - 1]));
+				LAPPDWaveforms->insert(pair<unsigned long, Waveform<double>>(achannel.GetChannelID(), Vwavs[numberOfLAPPDChannels - achannel.GetStripNum() - 1]));
 			}
 
 		}
@@ -170,8 +171,21 @@ bool LAPPDSim::Execute()
 	{
 		_display->FinaliseHistoAllLAPPDs();
 	}
-	m_data->Stores["ANNIEEvent"]->Set("LAPPDWaveforms", LAPPDWaveforms);
-	m_data->Stores["ANNIEEvent"]->Set("RawLAPPDData", RawLAPPDData);
+	// std::map<unsigned long, Waveform<double> >::iterator itera;
+	// for(itera = LAPPDWaveforms->begin(); itera != LAPPDWaveforms->end(); itera++){
+	// 	std::cout << "Channelkey " << itera->first << std::endl;
+	// 	Waveform<double> Penis = itera->second;
+	// 	std::vector<double> * samples = Penis.GetSamples();
+	// 	for(int i = 0; i < samples->size(); i++){
+	// 		std::cout << "Sample " << i << " Voltage " << samples->at(i) << std::endl;
+	// 	}
+	// }
+
+
+	std::cout << "Saving waveforms to store" << std::endl;
+
+	m_data->Stores.at("ANNIEEvent")->Set("LAPPDWaveforms", LAPPDWaveforms, true);
+	//m_data->Stores["ANNIEEvent"]->Set("RawLAPPDData", RawLAPPDData);
 
 	iter++;
 	_event_counter++;

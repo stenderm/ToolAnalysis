@@ -91,3 +91,4 @@
 #include "MrdDiscriminatorScan/MrdDiscriminatorScan.cpp"
 #include "MCRecoEventLoader/MCRecoEventLoader.cpp"
 #include "LoadGeometry/LoadGeometry.cpp"
+#include "TestWaveForm/TestWaveForm.cpp"

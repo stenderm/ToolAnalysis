@@ -83,5 +83,6 @@ if (tool=="MrdDiscriminatorScan") ret=new MrdDiscriminatorScan;
 if (tool=="MCRecoEventLoader") ret=new MCRecoEventLoader;
 if (tool=="LoadGeometry") ret=new LoadGeometry;
 
+  if (tool=="TestWaveForm") ret=new TestWaveForm;
 return ret;
 }

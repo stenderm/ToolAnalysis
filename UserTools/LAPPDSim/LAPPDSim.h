@@ -14,6 +14,8 @@
 #include "TBox.h"
 #include "TApplication.h"
 #include "LAPPDDisplay.h"
+// #include "Hit.h"
+// #include "LAPPDHit.h"
 
 class LAPPDSim: public Tool {
 
@@ -38,6 +40,7 @@ class LAPPDSim: public Tool {
    int _display_config;
    LAPPDDisplay* _display;
    Geometry* _geom = nullptr;
+   std::map<unsigned long, Waveform<double> >* LAPPDWaveforms = nullptr;
 
 };
 
