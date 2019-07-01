@@ -57,7 +57,24 @@ bool LAPPDSim::Initialise(std::string configfile, DataModel &data)
 bool LAPPDSim::Execute()
 {
 	std::cout << "Executing LAPPDSim; event counter " << _event_counter << std::endl;
-
+	// std::vector<std::map<unsigned long, Detector> * > * AllDetectors = _geom->GetDetectors();
+	// for(int l = 0; l < AllDetectors->size(); l++){
+	// 	int counter =0;
+	// 	std::map<unsigned long, Detector> * OneDetector = AllDetectors->at(l);
+	// 	std::map<unsigned long, Detector>::iterator itDet;
+	// 		for (itDet = OneDetector->begin(); itDet != OneDetector->end(); ++itDet){
+	// 			if(itDet->second.GetDetectorElement() == "LAPPD"){
+	// 				Position LAPPDPosition = itDet->second.GetDetectorPosition();
+	// 				double x1 = TMath::ATan2(LAPPDPosition.Z(), LAPPDPosition.X()-0.1) * (180 / TMath::Pi());
+	// 				double x2 = TMath::ATan2(LAPPDPosition.Z(), LAPPDPosition.X()+0.1) * (180 / TMath::Pi());
+	// 				std::cout << "TBox* _box" << counter << " = new TBox(" << x1 << "," <<  LAPPDPosition.Y()-0.1 << "," << x2 << "," << LAPPDPosition.Y()+0.1 << ");" << std::endl;
+	// 				std::cout << "_box" << counter << "->SetLineColor(kBlack);" << std::endl;
+	// 				std::cout << "_box" << counter << "->SetFillStyle(0);" << std::endl;
+	// 				//std::cout << "_box" << counter << "->Draw("l");" << std::endl;
+	// 				counter++;
+	// 			}
+	// 		}
+	// }
 	//std::map<unsigned long, vector<Waveform<double>>> RawLAPPDData;
 	LAPPDWaveforms = new std::map<unsigned long, Waveform<double> >;
 	LAPPDWaveforms->clear();
@@ -101,6 +118,7 @@ bool LAPPDSim::Execute()
 		response.Initialise(_tf);
 
 		//loop over the pulses on each lappd
+
 		for (int j = 0; j < mchits.size(); j++)
 		{
 			// Here we would input these pulses into our lappd model
@@ -111,12 +129,14 @@ bool LAPPDSim::Execute()
 			LAPPDHit ahit = mchits.at(j);
 			double atime = ahit.GetTime();      //*1000.;
 			pulsetimes.push_back(atime);
+			//local position is in [m], we need [mm] for the LAPPDResponse class' methods
 			vector<double> localpos = ahit.GetLocalPosition();  //SD
 			double trans = localpos.at(1) * 1000;         //SD
 			double para = localpos.at(0) * 1000;               //SD
 			response.AddSinglePhotonTrace(trans, para, atime);       //SD
 		}
-		vector<Waveform<double>> Vwavs;
+
+vector<Waveform<double>> Vwavs;
 
 		for (int i = -30; i < 31; i++)
 		{

@@ -127,7 +127,6 @@ void LAPPDDisplay::MCTruthDrawing(int eventNumber, unsigned long actualTubeNo, v
 			double phi = TMath::ATan2(globalHit.Z(), globalHit.X()) * (180 / TMath::Pi());
 			_all_hits->Fill(phi, globalHit.Y(), atime);
 		}
-
 		LAPPDMCHits->GetXaxis()->SetTitle("Transverse coordinate [m]");
 		LAPPDMCHits->GetYaxis()->SetTitle("Parallel coordinate [m]");
 		LAPPDTrans->GetYaxis()->SetTitleOffset(1.4);
@@ -214,8 +213,8 @@ void LAPPDDisplay::RecoDrawing(int eventCounter, unsigned long tubeNumber, std::
 		for (int j = 0; j < samplesleft->size(); j++)
 		{
 			double time = (double)j/10;
-			_left->Fill(time + 0.05, i, -samplesleft->at(j));
-			_right->Fill(time + 0.05, i, -samplesright->at(j));
+			_left->Fill(time + 0.00001, i, -samplesleft->at(j));
+			_right->Fill(time + 0.00001, i, -samplesright->at(j));
 		}
 	}
 
