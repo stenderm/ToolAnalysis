@@ -9,8 +9,10 @@
 #include "Tool.h"
 #include "TFile.h"
 #include "TTree.h"
+#include "TH1D.h"
+#include "TH2D.h"
 #include "wcsimT.h"
-#include "LAPPDresponse.hh"
+#include "LAPPDresponse.h"
 #include "TBox.h"
 #include "TApplication.h"
 #include "LAPPDDisplay.h"
@@ -29,18 +31,15 @@ class LAPPDSim: public Tool {
   Waveform<double> SimpleGenPulse(vector<double> pulsetimes);
 
  private:
-
-   //ROOT random number generator
    TRandom3* myTR;
-   TString SimInput;
    TFile* _tf;
-   std::vector <TH2D*> _LAPPD_histograms;
-   int iter = 0;
-   int _event_counter = 0;
+   int _event_counter;
+   int _file_number;
    int _display_config;
+   bool _is_artificial;
    LAPPDDisplay* _display;
-   Geometry* _geom = nullptr;
-   std::map<unsigned long, Waveform<double> >* LAPPDWaveforms = nullptr;
+   Geometry* _geom;
+   std::map<unsigned long, Waveform<double> >* LAPPDWaveforms;
 
 };
 

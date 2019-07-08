@@ -1,0 +1,3 @@
+myLoadWCSim LoadWCSim configfiles/RingCounting/LoadWCSimConfig
+myLoadWCSimLAPPD LoadWCSimLAPPD configfiles/RingCounting/LoadWCSimLAPPDConfig
+myRingCounting RingCounting configfiles/RingCounting/RingCountingConfig

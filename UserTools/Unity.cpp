@@ -92,3 +92,5 @@
 #include "MCRecoEventLoader/MCRecoEventLoader.cpp"
 #include "LoadGeometry/LoadGeometry.cpp"
 #include "TestWaveForm/TestWaveForm.cpp"
+#include "RingCounting/RingCounting.cpp"
+#include "RingCounting/CherenkovParameters.cpp"
