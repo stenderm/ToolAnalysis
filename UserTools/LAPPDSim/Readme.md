@@ -1,5 +1,4 @@
 # LAPPDSim
-
 LAPPDSim is used for the digital model of the LAPPDs. Currently the tool uses two additional classes, names LAPPDresponse and LAPPDDisplay. The LAPPDresponse class is used for the simulation of the waveforms, which result from hits on a LAPPD. The LAPPDDisplay class is used to create histograms for the verification of the functionality of the tool. The tool is currently able to save and display the following histograms:
 MC hits on all LAPPDs for every event (x-axis: radius of the tank, y-axis: height of the tank, z-axis or colour code: arrival time)
 MC hits for every LAPPD (x-axis: transverse coordinate, y-axis: parallel coordinate, z-axis: arrival time)

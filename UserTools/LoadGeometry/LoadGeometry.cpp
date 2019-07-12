@@ -1,6 +1,6 @@
 #include "LoadGeometry.h"
 
-LoadGeometry::LoadGeometry():Tool(){}
+LoadGeometry::LoadGeometry():Tool(),adet(nullptr){}
 
 
 bool LoadGeometry::Initialise(std::string configfile, DataModel &data){
@@ -34,9 +34,9 @@ bool LoadGeometry::Initialise(std::string configfile, DataModel &data){
 		return false;
   }
   if(!this->FileExists(fLAPPDGeoFile)){
-		Log("LoadGeometry Tool: File for LAPPD Geometry does not exist!",v_error,verbosity);
-        std::cout << "Filepath was... " << fLAPPDGeoFile << std::endl;
-		return false;
+    Log("LoadGeometry Tool: File for the LAPPDs does not exist!",v_error,verbosity);
+        std::cout << "Filepath was... " << fDetectorGeoFile << std::endl;
+    return false;
   }
 
   //Initialize the geometry using the geometry CSV file entries
@@ -45,7 +45,11 @@ bool LoadGeometry::Initialise(std::string configfile, DataModel &data){
   //Load MRD Geometry Detector/Channel Information
   this->LoadFACCMRDDetectors();
 
+  this->LoadLAPPDs();
+
   m_data->Stores.at("ANNIEEvent")->Header->Set("AnnieGeometry",AnnieGeometry,true);
+
+  //AnnieGeometry->GetChannel(0); // trigger InitChannelMap
 
   return true;
 }
@@ -163,8 +167,10 @@ void LoadGeometry::LoadFACCMRDDetectors(){
       boost::split(SpecLine,line, boost::is_any_of(","), boost::token_compress_on);
       if(verbosity>4) std::cout << "This line of data: " << line << std::endl;
       //Parse data line, make corresponding detector/channel
-      Detector FACCMRDDetector = this->ParseMRDDataEntry(SpecLine,MRDLegendEntries);
-      AnnieGeometry->AddDetector(FACCMRDDetector);
+      bool add_ok = this->ParseMRDDataEntry(SpecLine,MRDLegendEntries);
+      if(not add_ok){
+        std::cerr<<"Faild to add Detector to Geometry!"<<std::endl;
+      }
     }
   } else {
     Log("LoadGeometry tool: Something went wrong opening a file!!!",v_error,verbosity);
@@ -173,12 +179,7 @@ void LoadGeometry::LoadFACCMRDDetectors(){
     Log("LoadGeometry tool: FACC/MRD Detector/Channel loading complete",v_message,verbosity);
 }
 
-// void LoadGeometry::LoadLAPPDs(){
-//   Log("LoadGeometry tool: Now loading LAPPDs",v_message,verbosity);
-//
-// }
-
-Detector LoadGeometry::ParseMRDDataEntry(std::vector<std::string> SpecLine,
+bool LoadGeometry::ParseMRDDataEntry(std::vector<std::string> SpecLine,
         std::vector<std::string> MRDLegendEntries){
   //Parse the line for information needed to fill the detector & channel classes
   int detector_num,channel_num,detector_system,orientation,layer,side,num,
@@ -271,6 +272,26 @@ Detector LoadGeometry::ParseMRDDataEntry(std::vector<std::string> SpecLine,
                 detectorstatus::ON,
                 0.);
 
+  int MRD_x, MRD_y, MRD_z;
+  // orientation 0=horizontal, 1=vertical
+  MRD_x = (orientation) ? num  : side;
+  MRD_y = (orientation) ? side : num;
+  // veto layers are both cabled as z=0, with the layers differentiated by x=0, x=1
+  // in practice of course, both span the same x, but are offset in z.
+  if(layer>0) MRD_z = layer;
+  else        MRD_z = side;
+
+  Paddle apad( MRD_x,
+               MRD_y,
+               MRD_z,
+               orientation,
+               Position( x_center/100.,
+                         y_center/100.,
+                         z_center/100.),
+               std::pair<double,double>{x_center-(x_width/200.), x_center+(x_width/200.)},
+               std::pair<double,double>{y_center-(y_width/200.), y_center+(y_width/200.)},
+               std::pair<double,double>{z_center-(z_width/200.), z_center+(z_width/200.)});
+
   Channel pmtchannel( channel_num,
                       Position(0,0,0.),
                       -1, // stripside
@@ -289,9 +310,203 @@ Detector LoadGeometry::ParseMRDDataEntry(std::vector<std::string> SpecLine,
   // Add this channel to the geometry
   if(verbosity>4) cout<<"Adding channel "<<channel_num<<" to detector "<<detector_num<<endl;
   adet.AddChannel(pmtchannel);
-  return adet;
+  if(verbosity>5) cout<<"Adding detector to Geometry"<<endl;
+  AnnieGeometry->AddDetector(adet);
+  if(verbosity>4) cout<<"Adding paddle to Geometry"<<endl;
+  AnnieGeometry->SetDetectorPaddle(detector_num, apad);
+  return true;
 }
 
+void LoadGeometry::LoadLAPPDs(){
+  //First, get the LAPPD file data key
+  Log("LoadGeometry tool: Now loading LAPPDs",v_message,verbosity);
+  std::string LAPPDLegend = this->GetLegendLine(fLAPPDGeoFile);
+  std::vector<std::string> LAPPDLegendEntries;
+  boost::split(LAPPDLegendEntries,LAPPDLegend, boost::is_any_of(","), boost::token_compress_on);
+
+  std::string line;
+  ifstream myfile(fLAPPDGeoFile.c_str());
+  if (myfile.is_open()){
+    //First, get to where data starts
+    while(getline(myfile,line)){
+      if(line.find("#")!=std::string::npos) continue;
+      if(line.find(DataStartLineLabel)!=std::string::npos) break;
+    }
+    //Loop over lines, collect all detector specs
+    detector_num_store = 100000;
+    counter = 0;
+    while(getline(myfile,line)){
+      std::cout << line << std::endl; //has our stuff;
+      if(line.find("#")!=std::string::npos) continue;
+      if(line.find(DataEndLineLabel)!=std::string::npos) break;
+      std::vector<std::string> SpecLine;
+      boost::split(SpecLine,line, boost::is_any_of(","), boost::token_compress_on);
+      if(verbosity>4) std::cout << "This line of data: " << line << std::endl;
+      //Parse data line, make corresponding detector/channel
+      bool add_ok = this->ParseLAPPDDataEntry(SpecLine,LAPPDLegendEntries);
+      if(not add_ok){
+        std::cerr<<"Faild to add Detector to Geometry!"<<std::endl;
+      }
+    }
+  } else {
+    Log("LoadGeometry tool: Something went wrong opening a file!!!",v_error,verbosity);
+  }
+  if(myfile.is_open()) myfile.close();
+    Log("LoadGeometry tool: LAPPD Detector/Channel loading complete",v_message,verbosity);
+}
+
+
+bool LoadGeometry::ParseLAPPDDataEntry(std::vector<std::string> SpecLine,
+        std::vector<std::string> LAPPDLegendEntries){
+  //Parse the line for information needed to fill the detector & channel classes
+   int detector_num,channel_strip_side,channel_strip_num;
+   unsigned int channel_signal_crate,channel_signal_card,channel_signal_channel,channel_level2_crate,channel_level2_card,channel_level2_channel,channel_hv_crate,channel_hv_card,channel_hv_channel,channel_num;
+   double detector_position_x,detector_position_y,detector_position_z,detector_direction_x,detector_direction_y,detector_direction_z,channel_position_x,channel_position_y,channel_position_z;
+   std::string detector_type,detector_status,channel_status;
+  //Search for Legend entry.  Fill value type if found.
+  Log("LoadGeometry tool: parsing data line into variables",v_debug,verbosity);
+  for (int i=0; i<SpecLine.size(); i++){
+    int ivalue;
+    unsigned int uivalue;
+    double dvalue;
+    std::string svalue;
+    for (int j=0; j<LAPPDIntegerValues.size(); j++){
+      if(LAPPDLegendEntries.at(i) == LAPPDIntegerValues.at(j)){
+        ivalue = std::stoi(SpecLine.at(i));
+        break;
+      }
+    }
+    for (int j=0; j<LAPPDStringValues.size(); j++){
+      if(LAPPDLegendEntries.at(i) == LAPPDStringValues.at(j)){
+        svalue = SpecLine.at(i);
+        break;
+      }
+    }
+    for (int j=0; j<LAPPDDoubleValues.size(); j++){
+      if(LAPPDLegendEntries.at(i) == LAPPDDoubleValues.at(j)){
+        dvalue = std::stod(SpecLine.at(i));
+        break;
+      }
+    }
+    for (int j=0; j<LAPPDUnIntValues.size(); j++){
+      if(LAPPDLegendEntries.at(i) == LAPPDUnIntValues.at(j)){
+        uivalue = std::stoul(SpecLine.at(i));
+        break;
+      }
+    }
+    //Integers
+    if (LAPPDLegendEntries.at(i) == "detector_num") detector_num = ivalue;
+    if (LAPPDLegendEntries.at(i) == "channel_strip_side") channel_strip_side = ivalue;
+    if (LAPPDLegendEntries.at(i) == "channel_strip_num") channel_strip_num = ivalue;
+
+    //Unsigned Integers
+    if (LAPPDLegendEntries.at(i) == "channel_signal_crate") channel_signal_crate = uivalue;
+    if (LAPPDLegendEntries.at(i) == "channel_signal_card") channel_signal_card = uivalue;
+    if (LAPPDLegendEntries.at(i) == "channel_signal_channel") channel_signal_channel = uivalue;
+    if (LAPPDLegendEntries.at(i) == "channel_level2_crate") channel_level2_crate = uivalue;
+    if (LAPPDLegendEntries.at(i) == "channel_level2_card") channel_level2_card = uivalue;
+    if (LAPPDLegendEntries.at(i) == "channel_level2_channel") channel_level2_channel = uivalue;
+    if (LAPPDLegendEntries.at(i) == "channel_hv_crate") channel_hv_crate = uivalue;
+    if (LAPPDLegendEntries.at(i) == "channel_hv_card") channel_hv_card = uivalue;
+    if (LAPPDLegendEntries.at(i) == "channel_hv_channel") channel_hv_channel = uivalue;
+    if (LAPPDLegendEntries.at(i) == "channel_num") channel_num = uivalue;
+
+    //Doubles
+    if (LAPPDLegendEntries.at(i) == "detector_position_x") detector_position_x = dvalue;
+    if (LAPPDLegendEntries.at(i) == "detector_position_y") detector_position_y = dvalue;
+    if (LAPPDLegendEntries.at(i) == "detector_position_z") detector_position_z = dvalue;
+    if (LAPPDLegendEntries.at(i) == "detector_direction_x") detector_direction_x = dvalue;
+    if (LAPPDLegendEntries.at(i) == "detector_direction_y") detector_direction_y = dvalue;
+    if (LAPPDLegendEntries.at(i) == "detector_direction_z") detector_direction_z = dvalue;
+    if (LAPPDLegendEntries.at(i) == "channel_position_x") channel_position_x = dvalue;
+    if (LAPPDLegendEntries.at(i) == "channel_position_y") channel_position_y = dvalue;
+    if (LAPPDLegendEntries.at(i) == "channel_position_z") channel_position_z = dvalue;
+
+    //Strings
+    if (LAPPDLegendEntries.at(i) == "detector_type") detector_type = svalue;
+    if (LAPPDLegendEntries.at(i) == "detector_status") detector_status = svalue;
+    if (LAPPDLegendEntries.at(i) == "channel_status") channel_status = svalue;
+  }
+
+  if(verbosity>4) std::cout << "Filling a LAPPD data line into Detector/Channel classes" << std::endl;
+  if(detector_num != detector_num_store){
+  std::cout << "Create LAPPD" << std::endl;
+  detectorstatus detstat;
+  if(detector_status == "OFF"){
+    detstat = detectorstatus::OFF;
+    }
+    else if(detector_status == "ON"){
+      detstat = detectorstatus::ON;
+    }
+    else if(detector_status == "UNSTABLE"){
+      detstat = detectorstatus::UNSTABLE;
+    }
+    else{
+      std::cerr << "The chosen detector status isn't available!!!" << std::endl;
+    }
+  //TODO Somewhere it has to be stated that the units are in [m] for LAPPDs for now
+  std::cout << "HERE IS THE PONTER" << std::endl;
+  adet = new Detector(464+detector_num,
+                "LAPPD",
+                "Barrel",
+                Position(detector_position_x,
+                        detector_position_y,
+                        detector_position_z),
+                Direction(detector_direction_x,
+                          detector_direction_y,
+                          detector_direction_z),
+                detector_type,
+                detstat,
+                0.);
+  std::cout << "POINTER!!!!!!! AGAIN" << adet << std::endl;
+  detector_num_store = detector_num;
+  }
+
+  channelstatus channelstat;
+  if(channel_status == "OFF"){
+      channelstat = channelstatus::OFF;
+      }
+  else if(channel_status == "ON"){
+      channelstat = channelstatus::ON;
+        }
+  else if(channel_status == "UNSTABLE"){
+      channelstat = channelstatus::UNSTABLE;
+      }
+  else{
+  std::cerr << "The chosen channel status isn't available!!!" << std::endl;
+      }
+  Channel lappdchannel(464+channel_num,
+                      Position(channel_position_x,
+                               channel_position_y,
+                               channel_position_z),
+                      channel_strip_side,
+                      channel_strip_num,
+                      channel_signal_crate,
+                      channel_signal_card,
+                      channel_signal_channel,
+                      channel_level2_crate,
+                      channel_level2_card,
+                      channel_level2_channel,
+                      channel_hv_crate,
+                      channel_hv_card,
+                      channel_hv_channel,
+                      channelstat);
+
+  // Add this channel to the detector
+  if(adet != nullptr){
+  if(verbosity>4) cout<<"Adding channel "<<channel_num<<" to LAPPD "<<detector_num<<endl;
+  adet->AddChannel(lappdchannel);
+  }
+  counter++;
+  std::cout << "POINTER!!!!!!!!" << adet << std::endl;
+  std::cout << "COUNTER!!!!!!!!" << counter << std::endl;
+  if(adet != nullptr && counter == 60){
+  if(verbosity>5) cout<<"Adding LAPPD to Geometry"<<endl;
+  AnnieGeometry->AddDetector(*adet);
+  counter = 0;
+  }
+  return true;
+}
 
 bool LoadGeometry::FileExists(std::string name) {
   ifstream myfile(name.c_str());

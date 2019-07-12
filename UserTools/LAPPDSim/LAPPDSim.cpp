@@ -93,81 +93,98 @@ bool LAPPDSim::Execute()
 	{
 		vector<MCLAPPDHit> artificialHits;
 
-		std::vector<std::map<unsigned long, Detector> * > * AllDetectors = _geom->GetDetectors();
-		for(int l = 0; l < AllDetectors->size(); l++){
-			std::map<unsigned long, Detector> * OneDetector = AllDetectors->at(l);
-			std::map<unsigned long, Detector>::iterator itDet;
-			for (itDet = OneDetector->begin(); itDet != OneDetector->end(); ++itDet){
-				if(itDet->second.GetDetectorElement() == "LAPPD")
-				{
-					LAPPDresponse response;
-					response.Initialise(_tf);
-					artificialHits.clear();
-					int detectorID = itDet->second.GetDetectorID();
-					Position LAPPDPosition = itDet->second.GetDetectorPosition();
-					Position LAPPDDirection(itDet->second.GetDetectorDirection().X(),itDet->second.GetDetectorDirection().Y(),itDet->second.GetDetectorDirection().Z());
-					Position normalHeight(0,1,0);
-					Position side = normalHeight.Cross(LAPPDDirection);
-					std::vector<int> parents{0,0};
-					double charge = 1.0;
-					for(int i = 0; i < 2; i++){
-						double timeNs = 1.0 + 10 * i;
-						double paraMeter = 0.0;
-						double transMeter = 0.0;
-						// if(detectorID == 0){
-						// 	timeNs = 1.0;
-						// 	paraMeter = 0.1;
-						// 	transMeter = 0.0;
-						// }
-
-						std::vector<double> localPosition{paraMeter, transMeter};
-						std::vector<double> globalPosition{LAPPDPosition.X()+paraMeter*side.X(), LAPPDPosition.Y()+transMeter, LAPPDPosition.Z()+paraMeter*side.Z()};
-						MCLAPPDHit firstHit(detectorID, timeNs, charge, globalPosition, localPosition, parents);
-
-						artificialHits.push_back(firstHit);
-						double trans = transMeter * 1000;
-						double para = paraMeter * 1000;
-						double time = timeNs * 1000;
-						response.AddSinglePhotonTrace(trans, para, time);
-					}
-					if (_display_config > 0)
-					{
-						_display->MCTruthDrawing(_event_counter, detectorID, artificialHits);
-					}
-					vector<Waveform<double>> Vwavs;
-
-					for (int i = -30; i < 31; i++)
-					{
-						if (i == 0)
-						{
-							continue;
-						}
-						Waveform<double> awav = response.GetTrace(i, 0.0, 100, 256, 1.0);
-						Vwavs.push_back(awav);
-					}
-
-					if (_display_config > 0)
-					{
-						_display->RecoDrawing(_event_counter, detectorID, Vwavs);
-
-						if (_display_config == 2)
-						{
-							do
-							{
-								std::cout << "Press a key to continue..." << std::endl;
-							} while (cin.get() != '\n');
-
-							std::cout << "Continuing" << std::endl;
+		std::map<std::string, std::map<unsigned long,Detector*> >* AllDetectors = _geom->GetDetectors();
+		std::map<std::string, std::map<unsigned long,Detector*> >::iterator itGeom;
+		for(itGeom = AllDetectors->begin(); itGeom != AllDetectors->end(); ++itGeom){
+			if(itGeom->first == "LAPPD"){
+					std::map<unsigned long,Detector*> LAPPDDetectors = itGeom->second;
+					std::map<unsigned long,Detector*>::iterator itDetector;
+					for(itDetector = LAPPDDetectors.begin(); itDetector != LAPPDDetectors.end(); ++itDetector){
+						itDetector->second->Print();
+						std::map<unsigned long,Channel>* Channels = itDetector->second->GetChannels();
+						std::map<unsigned long,Channel>::iterator itChannel;
+						for(itChannel = Channels->begin(); itChannel != Channels->end(); ++itChannel){
+							itChannel->second.Print();
 						}
 					}
-					Vwavs.clear();
-					if(detectorID > 1){
-						break;
-					}
-				}
 			}
 		}
+		return true;
 	}
+	// 	for(int l = 0; l < AllDetectors->size(); l++){
+	// 		std::map<unsigned long, Detector> * OneDetector = AllDetectors->at(l);
+	// 		std::map<unsigned long, Detector>::iterator itDet;
+	// 		for (itDet = OneDetector->begin(); itDet != OneDetector->end(); ++itDet){
+	// 			if(itDet->second.GetDetectorElement() == "LAPPD")
+	// 			{
+	// 				LAPPDresponse response;
+	// 				response.Initialise(_tf);
+	// 				artificialHits.clear();
+	// 				int detectorID = itDet->second.GetDetectorID();
+	// 				Position LAPPDPosition = itDet->second.GetDetectorPosition();
+	// 				Position LAPPDDirection(itDet->second.GetDetectorDirection().X(),itDet->second.GetDetectorDirection().Y(),itDet->second.GetDetectorDirection().Z());
+	// 				Position normalHeight(0,1,0);
+	// 				Position side = normalHeight.Cross(LAPPDDirection);
+	// 				std::vector<int> parents{0,0};
+	// 				double charge = 1.0;
+	// 				for(int i = 0; i < 2; i++){
+	// 					double timeNs = 1.0 + 10 * i;
+	// 					double paraMeter = 0.0;
+	// 					double transMeter = 0.0;
+	// 					// if(detectorID == 0){
+	// 					// 	timeNs = 1.0;
+	// 					// 	paraMeter = 0.1;
+	// 					// 	transMeter = 0.0;
+	// 					// }
+	//
+	// 					std::vector<double> localPosition{paraMeter, transMeter};
+	// 					std::vector<double> globalPosition{LAPPDPosition.X()+paraMeter*side.X(), LAPPDPosition.Y()+transMeter, LAPPDPosition.Z()+paraMeter*side.Z()};
+	// 					MCLAPPDHit firstHit(detectorID, timeNs, charge, globalPosition, localPosition, parents);
+	//
+	// 					artificialHits.push_back(firstHit);
+	// 					double trans = transMeter * 1000;
+	// 					double para = paraMeter * 1000;
+	// 					double time = timeNs * 1000;
+	// 					response.AddSinglePhotonTrace(trans, para, time);
+	// 				}
+	// 				if (_display_config > 0)
+	// 				{
+	// 					_display->MCTruthDrawing(_event_counter, detectorID, artificialHits);
+	// 				}
+	// 				vector<Waveform<double>> Vwavs;
+	//
+	// 				for (int i = -30; i < 31; i++)
+	// 				{
+	// 					if (i == 0)
+	// 					{
+	// 						continue;
+	// 					}
+	// 					Waveform<double> awav = response.GetTrace(i, 0.0, 100, 256, 1.0);
+	// 					Vwavs.push_back(awav);
+	// 				}
+	//
+	// 				if (_display_config > 0)
+	// 				{
+	// 					_display->RecoDrawing(_event_counter, detectorID, Vwavs);
+	//
+	// 					if (_display_config == 2)
+	// 					{
+	// 						do
+	// 						{
+	// 							std::cout << "Press a key to continue..." << std::endl;
+	// 						} while (cin.get() != '\n');
+	//
+	// 						std::cout << "Continuing" << std::endl;
+	// 					}
+	// 				}
+	// 				Vwavs.clear();
+	// 				if(detectorID > 1){
+	// 					break;
+	// 				}
+	// 			}
+	// 		}
+	// 	}
+	// }
 //---------------------------------------------------------------------------------------------------------------------
 //MC events: Here is the implementation for the MC events
 	else
@@ -241,12 +258,14 @@ bool LAPPDSim::Execute()
 
 			//Get the channels of each LAPPD
 			std::map<unsigned long, Channel>* lappdchannel = thelappd->GetChannels();
+			thelappd->Print();
 			int numberOfLAPPDChannels = lappdchannel->size();
 			std::map<unsigned long, Channel>::iterator chitr;
 			//Loop over all channels for the assignment of the waveforms to the channels for storing the waveforms
 			for (chitr = lappdchannel->begin(); chitr != lappdchannel->end(); ++chitr)
 			{
 				Channel achannel = chitr->second;
+				//achannel->Print();
 				//This assignment uses the following numbering scheme:
 				//Channelkey 0-29 is the one side, Channelkey 30-59 is the other side in a way that 0 is the left side of the strip, where 30 denotes the right side.
 				if (achannel.GetStripSide() == 0)

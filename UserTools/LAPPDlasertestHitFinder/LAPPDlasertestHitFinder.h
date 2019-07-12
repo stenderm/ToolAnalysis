@@ -5,7 +5,7 @@
 #include <string>
 #include <iostream>
 #include "Tool.h"
-#include "../LAPPDSim/LAPPDresponse.hh"
+#include "../LAPPDSim/LAPPDresponse.h"
 #include "LAPPDHit.h"
 #include "LAPPDFindPeak.h"
 

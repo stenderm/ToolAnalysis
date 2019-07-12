@@ -16,12 +16,14 @@ class TestWaveForm: public Tool {
   bool Initialise(std::string configfile,DataModel &data);
   bool Execute();
   bool Finalise();
+  std::string GetStatus(detectorstatus detectorStatus);
+  std::string GetStatus(channelstatus channelStatus);
+  double IsItZero(double number);
 
 
  private:
     Geometry* _geom = nullptr;
    std::map<unsigned long, Waveform<double> >* _waveforms = nullptr;
-
 
 
 
