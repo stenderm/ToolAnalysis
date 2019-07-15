@@ -430,7 +430,6 @@ bool LoadGeometry::ParseLAPPDDataEntry(std::vector<std::string> SpecLine,
 
   if(verbosity>4) std::cout << "Filling a LAPPD data line into Detector/Channel classes" << std::endl;
   if(detector_num != detector_num_store){
-  std::cout << "Create LAPPD" << std::endl;
   detectorstatus detstat;
   if(detector_status == "OFF"){
     detstat = detectorstatus::OFF;
@@ -445,7 +444,6 @@ bool LoadGeometry::ParseLAPPDDataEntry(std::vector<std::string> SpecLine,
       std::cerr << "The chosen detector status isn't available!!!" << std::endl;
     }
   //TODO Somewhere it has to be stated that the units are in [m] for LAPPDs for now
-  std::cout << "HERE IS THE PONTER" << std::endl;
   adet = new Detector(464+detector_num,
                 "LAPPD",
                 "Barrel",
@@ -458,7 +456,6 @@ bool LoadGeometry::ParseLAPPDDataEntry(std::vector<std::string> SpecLine,
                 detector_type,
                 detstat,
                 0.);
-  std::cout << "POINTER!!!!!!! AGAIN" << adet << std::endl;
   detector_num_store = detector_num;
   }
 
@@ -498,8 +495,6 @@ bool LoadGeometry::ParseLAPPDDataEntry(std::vector<std::string> SpecLine,
   adet->AddChannel(lappdchannel);
   }
   counter++;
-  std::cout << "POINTER!!!!!!!!" << adet << std::endl;
-  std::cout << "COUNTER!!!!!!!!" << counter << std::endl;
   if(adet != nullptr && counter == 60){
   if(verbosity>5) cout<<"Adding LAPPD to Geometry"<<endl;
   AnnieGeometry->AddDetector(*adet);

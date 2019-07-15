@@ -22,20 +22,20 @@ do
 	    helpmenu
 	    exit
 	    ;;
-	
+
 	--no_root | -r)
 	    echo "Installing ToolDAQ without root"
-	    rootflag=0 
+	    rootflag=0
 	    ;;
-	
+
 	--no_boost | -b)
             echo "Installing ToolDAQ without boost"
             boostflag=0
 	    ;;
-	
+
 	--FNAL | -f)
             echo "Installing ToolDAQ for FNAL"
-            boostflag=0
+            boostflag=1
 	    rootflag=0
 	    fnalflag=1
             Python=0
@@ -68,7 +68,7 @@ do
 	    boostflag=0
 	    final=0
 	    MrdTrackLib=0
-	    WCSimlib=0   
+	    WCSimlib=0
 	    Python=0
             ;;
 
@@ -83,7 +83,7 @@ do
 	    WCSimlib=0
 	    Python=0
             ;;
-	
+
 	--Root )
             echo "Installing ToolDAQ"
 	    init=0
@@ -109,7 +109,7 @@ do
 	    root6flag=1
 	    Python=0
             ;;
-	
+
 	--WCSim )
             echo "Installing WCSim libs"
 	    init=0
@@ -151,7 +151,7 @@ done
 
 if [ $init -eq 1 ]
 then
-    
+
     mkdir ToolDAQ
 fi
 
@@ -166,52 +166,52 @@ fi
 if [ $zmq -eq 1 ]
 then
     git clone https://github.com/ToolDAQ/zeromq-4.0.7.git
-    
+
     cd zeromq-4.0.7
-    
+
     ./configure --prefix=`pwd`
     make -j8
     make install
-    
+
     export LD_LIBRARY_PATH=`pwd`/lib:$LD_LIBRARY_PATH
-    
+
     cd ../
 fi
 
 if [ $boostflag -eq 1 ]
 then
-    
-    
+
+
     wget http://downloads.sourceforge.net/project/boost/boost/1.66.0/boost_1_66_0.tar.gz
     tar zxf boost_1_66_0.tar.gz
     rm -rf boost_1_66_0.tar.gz
-    
+
     cd boost_1_66_0
-    
+
     mkdir install
-    
+
     ./bootstrap.sh --prefix=`pwd`/install/  > /dev/null 2>/dev/null
     ./b2 install iostreams
-    
+
     export LD_LIBRARY_PATH=`pwd`/install/lib:$LD_LIBRARY_PATH
     cd ../
 fi
 
 if [ $rootflag -eq 1 ]
 then
-    
+
     wget https://root.cern.ch/download/root_v5.34.34.source.tar.gz
     tar zxvf root_v5.34.34.source.tar.gz
     rm -rf root_v5.34.34.source.tar.gz
     cd root
-    
+
     ./configure --enable-rpath
     make -j8
-    
+
     source ./bin/thisroot.sh
-    
+
     cd ../
-    
+
 fi
 
 if [ $root6flag -eq 1 ]
@@ -258,7 +258,7 @@ fi
 
 if [ $MrdTrackLib -eq 1 ]
 then
-    
+
     cd ../
     if [ $fnalflag -eq 1 ]; then
       source SetupFNAL.sh
@@ -291,12 +291,12 @@ fi
 
 if [ $final -eq 1 ]
 then
-    
-    cd ..
+
     echo "current directory"
     echo `pwd`
+    cd ..
     make clean
-    make 
-    
+    make
+
     export LD_LIBRARY_PATH=`pwd`/lib:$LD_LIBRARY_PATH
 fi

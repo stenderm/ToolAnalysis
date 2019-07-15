@@ -3,7 +3,8 @@
 
 verbose 1
 
-InputFile /ANNIECode/simulations/mu_e_rootfiles/wcsim_electrons_isotropic_exemplary.root
+#InputFile /ANNIECode/simulations/mu_e_rootfiles/wcsim_electrons_isotropic_exemplary.root
+InputFile /pnfs/annie/persistent/users/moflaher/wcsim/multipmt/tankonly/wcsim_3-12-18_ANNIEp2v6_BNB_Water_10k_22-05-17/wcsim_0.0.0.root
 
 WCSimVersion 3               ## should reflect the WCSim version of the files being loaded
 HistoricTriggeroffset 0      ## time offset of digits relative to the trigger
