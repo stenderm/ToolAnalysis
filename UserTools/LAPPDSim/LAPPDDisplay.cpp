@@ -153,7 +153,7 @@ void LAPPDDisplay::MCTruthDrawing(int eventNumber, unsigned long actualTubeNo, v
 		TH2D* LAPPDMCHits = new TH2D(individualNamec, individualNamec, 60, -0.12, 0.12, 60, -0.12, 0.12);
 
     //Find the minimal time to create the histograms in a decent range
-		double mintime = 1000000;
+		double mintime = 1000000.0;
 		for (int k = 0; k < mchits.size(); k++)
 		{
 			LAPPDHit ahit = mchits.at(k);
@@ -171,8 +171,8 @@ void LAPPDDisplay::MCTruthDrawing(int eventNumber, unsigned long actualTubeNo, v
 		const char * charNamePara = namePara.c_str();
 
     //Initialisation of the histograms
-		TH2D* LAPPDTrans = new TH2D(charNameTrans, charNameTrans, 256, mintime-1, mintime + 25.6, 60, -0.12, 0.12);
-		TH2D* LAPPDPara = new TH2D(charNamePara, charNamePara, 256, mintime-1, mintime + 25.6, 60, -0.12, 0.12);
+		TH2D* LAPPDTrans = new TH2D(charNameTrans, charNameTrans, 256, mintime-1.0, mintime + 25.6, 60, -0.12, 0.12);
+		TH2D* LAPPDPara = new TH2D(charNamePara, charNamePara, 256, mintime-1.0, mintime + 25.6, 60, -0.12, 0.12);
 
     //loop over all MC hits
     for (int i = 0; i < mchits.size(); i++)

@@ -40,7 +40,12 @@ class LAPPDSim: public Tool {
    bool _is_artificial;
    LAPPDDisplay* _display;
    Geometry* _geom;
-   std::map<unsigned long, Waveform<double> >* LAPPDWaveforms;
+   //std::map<unsigned long, Waveform<double> >* LAPPDWaveforms;
+   //std::map<unsigned long, Waveform<double> >* TriggeredLAPPDWaveforms;
+   //LAPPDWaveforms(nullptr),TriggeredLAPPDWaveforms(nullptr),
+   double _threshold;
+   int _number_look_back;
+   int _number_adjacent_triggers;
 
 };
 

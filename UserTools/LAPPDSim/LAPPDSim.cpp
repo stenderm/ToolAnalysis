@@ -1,13 +1,13 @@
 #include "LAPPDSim.h"
 #include <unistd.h>
 
-LAPPDSim::LAPPDSim():Tool(),myTR(nullptr),_tf(nullptr),_event_counter(0),_file_number(0),_display_config(0),_is_artificial(false),_display(nullptr),_geom(nullptr),LAPPDWaveforms(nullptr)
+LAPPDSim::LAPPDSim():Tool(),myTR(nullptr),_tf(nullptr),_event_counter(0),_file_number(0),_display_config(0),_is_artificial(false),_display(nullptr),_geom(nullptr),
+_threshold(0.0),_number_look_back(0),_number_adjacent_triggers(0)
 {
 }
 
 bool LAPPDSim::Initialise(std::string configfile, DataModel &data)
 {
-
 	/////////////////// Usefull header ///////////////////////
 	if (configfile != "")
 	m_variables.Initialise(configfile); //loading config file
@@ -17,7 +17,7 @@ bool LAPPDSim::Initialise(std::string configfile, DataModel &data)
 	//Get the config parameters and print them
 
 	//File path to pulsecharacteristics.root
-  std::string pulsecharacteristicsFile;
+	std::string pulsecharacteristicsFile;
 	m_variables.Get("PathToPulsecharacteristics", pulsecharacteristicsFile);
 	std::cout << "Path to pulsecharacteristics.root: " << pulsecharacteristicsFile << std::endl;
 	const char * pulsecharacteristicsFileChar = pulsecharacteristicsFile.c_str();
@@ -45,6 +45,18 @@ bool LAPPDSim::Initialise(std::string configfile, DataModel &data)
 	outputFile.erase(outputFile.size()-5);
 	outputFile = outputFile + "00.root";
 
+
+	m_variables.Get("Threshold", _threshold);
+	std::cout << "Threshold: " << _threshold << " mV" << std::endl;
+
+
+	m_variables.Get("NumberLookBack", _number_look_back);
+	std::cout << "Number of look back samples " << _number_look_back << std::endl;
+
+
+	m_variables.Get("NumberAdjacentTriggers", _number_adjacent_triggers);
+	std::cout << "Number of adjacent triggers " << _number_adjacent_triggers << std::endl;
+
 	//Get the Geometry information
 	bool testgeom = m_data->Stores["ANNIEEvent"]->Header->Get("AnnieGeometry", _geom);
 	if (not testgeom)
@@ -52,6 +64,21 @@ bool LAPPDSim::Initialise(std::string configfile, DataModel &data)
 		std::cerr << "LAPPDSim Tool: Could not find Geometry in the ANNIEEvent!" << std::endl;
 		return false;
 	}
+
+	// std::map<std::string, std::map<unsigned long,Detector*> >* OurDetectors = _geom->GetDetectors();
+	// std::map<std::string, std::map<unsigned long,Detector*> >::iterator iteratorGeom;
+	// for(iteratorGeom = OurDetectors->begin(); iteratorGeom != OurDetectors->end(); ++iteratorGeom){
+	// 	if(iteratorGeom->first == "Tank"){
+	// 		std::map<unsigned long,Detector*> PMTDetectors = iteratorGeom->second;
+	// 		std::map<unsigned long,Detector*>::iterator iteratorDet;
+	// 		for(iteratorDet = PMTDetectors.begin(); iteratorDet != PMTDetectors.end(); ++iteratorDet){
+	// 			Detector* oneDetector = iteratorDet->second;
+	// 			Position P = oneDetector->GetDetectorPosition();
+	// 			Direction D = oneDetector->GetDetectorDirection();
+	// 			std::cout << P.X() << "," << P.Y() << "," << P.Z() << "," << D.X() << "," << D.Y() <<"," << D.Z() << "    " << oneDetector->GetTankLocation() << std::endl;
+	// 		}
+	// 	}
+	// }
 
 	// This quantity should be set to false if we are working with real data later
 	//bool isSim = true;
@@ -93,13 +120,13 @@ bool LAPPDSim::Execute()
 	{
 		vector<MCLAPPDHit> artificialHits;
 
-	std::map<std::string, std::map<unsigned long,Detector*> >* AllDetectors = _geom->GetDetectors();
-	std::map<std::string, std::map<unsigned long,Detector*> >::iterator itGeom;
-	for(itGeom = AllDetectors->begin(); itGeom != AllDetectors->end(); ++itGeom){
-		if(itGeom->first == "LAPPD"){
-			std::map<unsigned long,Detector*> LAPPDDetectors = itGeom->second;
-  		std::map<unsigned long, Detector*>::iterator itDet;
-					for(itDet = LAPPDDetectors.begin(); itDet != LAPPDDetectors.end(); ++itDet){
+		std::map<std::string, std::map<unsigned long,Detector*> >* AllDetectors = _geom->GetDetectors();
+		std::map<std::string, std::map<unsigned long,Detector*> >::iterator itGeom;
+		for(itGeom = AllDetectors->begin(); itGeom != AllDetectors->end(); ++itGeom){
+			if(itGeom->first == "LAPPD"){
+				std::map<unsigned long,Detector*> LAPPDDetectors = itGeom->second;
+				std::map<unsigned long,Detector*>::iterator itDet;
+				for(itDet = LAPPDDetectors.begin(); itDet != LAPPDDetectors.end(); ++itDet){
 
 					LAPPDresponse response;
 					response.Initialise(_tf);
@@ -111,10 +138,10 @@ bool LAPPDSim::Execute()
 					Position side = normalHeight.Cross(LAPPDDirection);
 					std::vector<int> parents{0,0};
 					double charge = 1.0;
-					for(int i = 0; i < 2; i++){
+					for(int i = 0; i < 3; i++){
 						double timeNs = 1.0 + 10 * i;
-						double paraMeter = 0.0;
-						double transMeter = 0.0;
+						double paraMeter = 0.0;//-0.1 + i * 0.02;
+						double transMeter = 0.0;//-0.1 + i * 0.02;
 						// if(detectorID == 0){
 						// 	timeNs = 1.0;
 						// 	paraMeter = 0.1;
@@ -126,9 +153,9 @@ bool LAPPDSim::Execute()
 						MCLAPPDHit firstHit(detectorID, timeNs, charge, globalPosition, localPosition, parents);
 
 						artificialHits.push_back(firstHit);
-						double trans = transMeter * 1000;
-						double para = paraMeter * 1000;
-						double time = timeNs * 1000;
+						double trans = transMeter * 1000.0;
+						double para = paraMeter * 1000.0;
+						double time = timeNs * 1000.0;
 						response.AddSinglePhotonTrace(trans, para, time);
 					}
 					if (_display_config > 0)
@@ -162,20 +189,22 @@ bool LAPPDSim::Execute()
 						}
 					}
 					Vwavs.clear();
-					if(detectorID > 1){
+					if(detectorID > 7){
 						break;
 					}
 				}
 			}
 		}
 	}
-//---------------------------------------------------------------------------------------------------------------------
-//MC events: Here is the implementation for the MC events
+	//---------------------------------------------------------------------------------------------------------------------
+	//MC events: Here is the implementation for the MC events
 	else
 	{
 		//storage for the waveforms
-		LAPPDWaveforms = new std::map<unsigned long, Waveform<double> >;
+		std::map<unsigned long, Waveform<double> >* LAPPDWaveforms = new std::map<unsigned long, Waveform<double> >;
+		std::map<unsigned long, Waveform<double> >* TriggeredLAPPDWaveforms = new std::map<unsigned long, Waveform<double> >;
 		LAPPDWaveforms->clear();
+		TriggeredLAPPDWaveforms->clear();
 		// get the MC Hits
 		std::map<unsigned long, std::vector<MCLAPPDHit> >* lappdmchits;
 		bool testval = m_data->Stores["ANNIEEvent"]->Get("MCLAPPDHits", lappdmchits);
@@ -215,7 +244,7 @@ bool LAPPDSim::Execute()
 			for (int j = 0; j < mchits.size(); j++)
 			{
 				LAPPDHit ahit = mchits.at(j);
-				//Time is in [ns], we need [ps] for the LAPPDrespnse class' methods.
+				//Time is in [ns], we need [ps] for the LAPPDresponse class' methods.
 				double atime = ahit.GetTime()*1000.;
 				//local position is in [m], we need [mm] for the LAPPDresponse class' methods.
 				vector<double> localpos = ahit.GetLocalPosition();
@@ -235,10 +264,53 @@ bool LAPPDSim::Execute()
 				{
 					continue;
 				}
-				//Retrive the traces, which were stored with the AddSinglePhotonTrace method
+				//Retrieve the traces, which were stored with the AddSinglePhotonTrace method
 				Waveform<double> awav = response.GetTrace(i, 0.0, 100, 256, 1.0);
+				//std::cout << "Start time " << awav.GetStartTime() << std::endl;
 				Vwavs.push_back(awav);
 			}
+
+			//Trigger implementation
+			int adjacentCounter = 0;
+			std::vector<int> timeStampsOfTrigger;
+			std::vector<int> numbersAboveTrigger;
+			int sampleAtTrigger = 0;
+			int numberOfSamples = Vwavs[0].GetSamples()->size();
+			//Only use one side to trigger.
+			//One needs still to decide, which side it should be
+			for(int iSample = 0; iSample < numberOfSamples; iSample++){
+				for(int iWaveform = 0; iWaveform < Vwavs.size()/2; iWaveform++){
+					std::vector<double>* oneWaveform = Vwavs[iWaveform].GetSamples();
+					if(abs(oneWaveform->at(iSample)) > _threshold){
+						adjacentCounter++;
+					}
+					else{
+						if(adjacentCounter >= _number_adjacent_triggers){
+							sampleAtTrigger = iSample;
+							break;
+						}
+					}
+				}
+				break;
+			}
+
+			vector<Waveform<double>> triggeredWaveforms;
+			for(int iWaveform = 0; iWaveform < Vwavs.size(); iWaveform++){
+				std::vector<double>* oneWaveform = Vwavs[iWaveform].GetSamples();
+				Waveform<double> aTriggeredWaveform;
+				std::vector<double> triggeredSample;
+				for(int iSample = 0; iSample < numberOfSamples; iSample++){
+					if(iSample >= (sampleAtTrigger - _number_look_back)){
+						triggeredSample.push_back(oneWaveform->at(iSample));
+					}
+				}
+				aTriggeredWaveform.SetSamples(triggeredSample);
+				aTriggeredWaveform.SetStartTime(sampleAtTrigger);
+				triggeredWaveforms.push_back(aTriggeredWaveform);
+			}
+
+
+
 
 			//Get the channels of each LAPPD
 			std::map<unsigned long, Channel>* lappdchannel = thelappd->GetChannels();
@@ -254,10 +326,12 @@ bool LAPPDSim::Execute()
 				if (achannel.GetStripSide() == 0)
 				{
 					LAPPDWaveforms->insert(pair<unsigned long, Waveform<double>>(achannel.GetChannelID(), Vwavs[achannel.GetStripNum()]));
+					TriggeredLAPPDWaveforms->insert(pair<unsigned long, Waveform<double>>(achannel.GetChannelID(), triggeredWaveforms[achannel.GetStripNum()]));
 				}
 				else
 				{
 					LAPPDWaveforms->insert(pair<unsigned long, Waveform<double>>(achannel.GetChannelID(), Vwavs[numberOfLAPPDChannels - achannel.GetStripNum() - 1]));
+					TriggeredLAPPDWaveforms->insert(pair<unsigned long, Waveform<double>>(achannel.GetChannelID(), triggeredWaveforms[numberOfLAPPDChannels - achannel.GetStripNum() - 1]));
 				}
 
 			}
@@ -278,21 +352,20 @@ bool LAPPDSim::Execute()
 			}
 
 		}				//end loop over LAPPDs
+
+		std::cout << "Saving waveforms to store" << std::endl;
+		//The waveforms are only saved if MC events are used.
+		//The artifical events are not meant to be saved, because they cannot be used in any other tool,
+		//since there won't be any hit information in the MCHits or MCLAPPDHits
+		m_data->Stores.at("ANNIEEvent")->Set("LAPPDWaveforms", LAPPDWaveforms, true);
+		m_data->Stores.at("ANNIEEvent")->Set("TriggeredLAPPDWaveforms", TriggeredLAPPDWaveforms, true);
+		delete LAPPDWaveforms;
+		delete TriggeredLAPPDWaveforms;
 	} //end else of if(_is_artificial)
 
 	if (_display_config > 0)
 	{
 		_display->FinaliseHistoAllLAPPDs();
-	}
-
-	//The waveforms are only saved if MC events are used.
-	//The artifical events are not meant to be saved, because they cannot be used in any other tool,
-	//since there won't be any hit information in the MCHits or MCLAPPDHits
-	if(!_is_artificial)
-	{
-		std::cout << "Saving waveforms to store" << std::endl;
-
-		m_data->Stores.at("ANNIEEvent")->Set("LAPPDWaveforms", LAPPDWaveforms, true);
 	}
 	_event_counter++;
 
