@@ -319,19 +319,26 @@ bool LAPPDSim::Execute()
 			//Loop over all channels for the assignment of the waveforms to the channels for storing the waveforms
 			for (chitr = lappdchannel->begin(); chitr != lappdchannel->end(); ++chitr)
 			{
+
 				Channel achannel = chitr->second;
+				//cout<<"LAPPDnumerology: "<< achannel.GetStripSide() << " " << achannel.GetChannelID()<<" "<<achannel.GetStripNum()<<" "<<numberOfLAPPDChannels<<endl;
 				//achannel->Print();
 				//This assignment uses the following numbering scheme:
 				//Channelkey 0-29 is the one side, Channelkey 30-59 is the other side in a way that 0 is the left side of the strip, where 30 denotes the right side.
-				if (achannel.GetStripSide() == 0)
+
+				if (achannel.GetStripSide() == 1)
 				{
-					LAPPDWaveforms->insert(pair<unsigned long, Waveform<double>>(achannel.GetChannelID(), Vwavs[achannel.GetStripNum()]));
-					TriggeredLAPPDWaveforms->insert(pair<unsigned long, Waveform<double>>(achannel.GetChannelID(), triggeredWaveforms[achannel.GetStripNum()]));
+					int number = achannel.GetStripNum();
+					// cout << "number " << number << endl;
+					LAPPDWaveforms->insert(pair<unsigned long, Waveform<double>>(achannel.GetChannelID(), Vwavs[number]));
+					TriggeredLAPPDWaveforms->insert(pair<unsigned long, Waveform<double>>(achannel.GetChannelID(), triggeredWaveforms[number]));
 				}
 				else
 				{
-					LAPPDWaveforms->insert(pair<unsigned long, Waveform<double>>(achannel.GetChannelID(), Vwavs[numberOfLAPPDChannels - achannel.GetStripNum() - 1]));
-					TriggeredLAPPDWaveforms->insert(pair<unsigned long, Waveform<double>>(achannel.GetChannelID(), triggeredWaveforms[numberOfLAPPDChannels - achannel.GetStripNum() - 1]));
+					int number = achannel.GetStripNum() + 1;
+					// cout << "number " << number << endl;
+					LAPPDWaveforms->insert(pair<unsigned long, Waveform<double>>(achannel.GetChannelID(), Vwavs[numberOfLAPPDChannels - number]));
+					TriggeredLAPPDWaveforms->insert(pair<unsigned long, Waveform<double>>(achannel.GetChannelID(), triggeredWaveforms[numberOfLAPPDChannels - number]));
 				}
 
 			}
@@ -353,14 +360,20 @@ bool LAPPDSim::Execute()
 
 		}				//end loop over LAPPDs
 
-		std::cout << "Saving waveforms to store" << std::endl;
+		std::cout << "Saving waveforms to store " << LAPPDWaveforms->size() << std::endl;
 		//The waveforms are only saved if MC events are used.
 		//The artifical events are not meant to be saved, because they cannot be used in any other tool,
 		//since there won't be any hit information in the MCHits or MCLAPPDHits
+		cout << "Saving LAPPDWaveforms" << endl;
 		m_data->Stores.at("ANNIEEvent")->Set("LAPPDWaveforms", LAPPDWaveforms, true);
+		cout << "Saving TriggeredLAPPDWaveforms" << endl;
 		m_data->Stores.at("ANNIEEvent")->Set("TriggeredLAPPDWaveforms", TriggeredLAPPDWaveforms, true);
-		delete LAPPDWaveforms;
-		delete TriggeredLAPPDWaveforms;
+		// cout << "Delete LAPPDWaveforms" << endl;
+		// // delete LAPPDWaveforms;
+		// cout << "Delete TriggeredLAPPDWaveforms" << endl;
+		// // delete TriggeredLAPPDWaveforms;
+		// cout << "End of tool" << endl;
+
 	} //end else of if(_is_artificial)
 
 	if (_display_config > 0)

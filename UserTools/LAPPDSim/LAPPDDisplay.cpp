@@ -200,6 +200,7 @@ void LAPPDDisplay::MCTruthDrawing(int eventNumber, unsigned long actualTubeNo, v
 		LAPPDMCHits->GetYaxis()->SetTitleOffset(1.4);
 		LAPPDMCHits->GetZaxis()->SetTitle("Arrival time [ns]");
 		LAPPDMCHits->GetZaxis()->SetTitleOffset(1.4);
+		LAPPDMCHits->SetOption("COLZ");
 		LAPPDMCHits->Write();
 
 		LAPPDTrans->GetYaxis()->SetTitle("Transverse coordinate [m]");
@@ -207,6 +208,7 @@ void LAPPDDisplay::MCTruthDrawing(int eventNumber, unsigned long actualTubeNo, v
 		LAPPDTrans->GetXaxis()->SetTitle("Arrival time [ns]");
 		LAPPDTrans->GetZaxis()->SetTitle("Events");
     LAPPDTrans->GetZaxis()->SetTitleOffset(1.4);
+		LAPPDTrans->SetOption("COLZ");
 		LAPPDTrans->Write();
 
 		LAPPDPara->GetYaxis()->SetTitle("Parallel coordinate [m]");
@@ -214,6 +216,7 @@ void LAPPDDisplay::MCTruthDrawing(int eventNumber, unsigned long actualTubeNo, v
 		LAPPDPara->GetXaxis()->SetTitle("Arrival time [ns]");
 		LAPPDPara->GetZaxis()->SetTitle("Events");
     LAPPDPara->GetZaxis()->SetTitleOffset(1.4);
+		LAPPDPara->SetOption("COLZ");
 		LAPPDPara->Write();
 
     //Adjust the canvases and draw the histograms in the right canvases
@@ -254,6 +257,7 @@ void LAPPDDisplay::FinaliseHistoAllLAPPDs(){
 	_all_hits->GetYaxis()->SetTitle("Height [m]");
 	_all_hits->GetZaxis()->SetTitle("Arrival time [ns]");
 	_all_hits->GetZaxis()->SetTitleOffset(1.4);
+	_all_hits->SetOption("COLZ");
 	_all_hits->Write();
   //Canvas adjustments
 	if(_config_number == 2)
@@ -330,11 +334,13 @@ void LAPPDDisplay::RecoDrawing(int eventCounter, unsigned long tubeNumber, std::
     waveformLeft->GetXaxis()->SetTitle("Time [ns]");
     waveformLeft->GetYaxis()->SetTitle("Voltage [mV]");
     waveformLeft->GetYaxis()->SetTitleOffset(1.4);
+		waveformLeft->SetOption("COLZ");
     waveformLeft->Write();
 
     waveformRight->GetXaxis()->SetTitle("Time [ns]");
     waveformRight->GetYaxis()->SetTitle("Voltage [mV]");
     waveformRight->GetYaxis()->SetTitleOffset(1.4);
+    waveformRight->SetOption("COLZ");
     waveformRight->Write();
 
     //Canvas adjustments
@@ -357,11 +363,13 @@ void LAPPDDisplay::RecoDrawing(int eventCounter, unsigned long tubeNumber, std::
 	leftAllWaveforms->GetYaxis()->SetTitle("Strip number");
 	leftAllWaveforms->GetZaxis()->SetTitle("Voltage [mV]");
 	//leftAllWaveforms->GetZaxis()->SetTitleOffset(1.4);
+	leftAllWaveforms->SetOption("COLZ");
 	leftAllWaveforms->Write();
 
 	rightAllWaveforms->GetXaxis()->SetTitle("Time [ns]");
 	rightAllWaveforms->GetYaxis()->SetTitle("Strip number");
 	rightAllWaveforms->GetZaxis()->SetTitle("Voltage [mV]");
+	rightAllWaveforms->SetOption("COLZ");
 	//rightAllWaveforms->GetZaxis()->SetTitleOffset(1.4);
 	rightAllWaveforms->Write();
 
