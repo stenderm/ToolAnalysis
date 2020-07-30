@@ -1,4 +1,5 @@
 #include "LAPPDSim.h"
+#include "LAPPDTrigger.h"
 #include <unistd.h>
 
 LAPPDSim::LAPPDSim():Tool(),myTR(nullptr),_tf(nullptr),_event_counter(0),_file_number(0),_display_config(0),_is_artificial(false),_display(nullptr),_geom(nullptr),
@@ -103,14 +104,35 @@ bool LAPPDSim::Execute()
 	//Every 100 events get a new file.
 	if(_event_counter == (20 * (_file_number + 1)))
 	{
-		_display->OpenNewFile(_file_number);
 		_file_number++;
+		_display->OpenNewFile(_file_number);
 	}
 	//Initialise the histogram for displaying all LAPPDs at once
 	if (_display_config > 0)
 	{
 		_display->InitialiseHistoAllLAPPDs(_event_counter);
 	}
+	int numberOfLAPPDs = _geom->GetNumLAPPDs();
+
+	int numberOfLAPPDChannels = 0;
+	std::map<std::string, std::map<unsigned long,Detector*> >* AllDetectors = _geom->GetDetectors();
+	std::map<std::string, std::map<unsigned long,Detector*> >::iterator itGeom;
+	for(itGeom = AllDetectors->begin(); itGeom != AllDetectors->end(); ++itGeom){
+		if(itGeom->first == "LAPPD"){
+			std::map<unsigned long,Detector*> LAPPDDetectors = itGeom->second;
+			std::map<unsigned long, Channel>* lappdchannel = LAPPDDetectors.at(0)->GetChannels();
+			numberOfLAPPDChannels = lappdchannel->size();
+			break;
+		}
+	}
+
+
+
+
+
+	LAPPDTrigger* triggerObject = new LAPPDTrigger(numberOfLAPPDs, numberOfLAPPDChannels, _threshold, _number_adjacent_triggers);
+
+
 
 	//----------------------------------------------------------------------------------------------------------------------------------------------------------
 	//Artifical Events: This is only used for test purposes and is just a quick and dirty solution to try some things.
@@ -121,13 +143,13 @@ bool LAPPDSim::Execute()
 		vector<MCLAPPDHit> artificialHits;
 
 		std::map<std::string, std::map<unsigned long,Detector*> >* AllDetectors = _geom->GetDetectors();
+
 		std::map<std::string, std::map<unsigned long,Detector*> >::iterator itGeom;
 		for(itGeom = AllDetectors->begin(); itGeom != AllDetectors->end(); ++itGeom){
 			if(itGeom->first == "LAPPD"){
 				std::map<unsigned long,Detector*> LAPPDDetectors = itGeom->second;
 				std::map<unsigned long,Detector*>::iterator itDet;
 				for(itDet = LAPPDDetectors.begin(); itDet != LAPPDDetectors.end(); ++itDet){
-
 					LAPPDresponse response;
 					response.Initialise(_tf);
 					artificialHits.clear();
@@ -207,13 +229,13 @@ bool LAPPDSim::Execute()
 		TriggeredLAPPDWaveforms->clear();
 		// get the MC Hits
 		std::map<unsigned long, std::vector<MCLAPPDHit> >* lappdmchits;
+
 		bool testval = m_data->Stores["ANNIEEvent"]->Get("MCLAPPDHits", lappdmchits);
 		if (not testval)
 		{
 			std::cerr << "LAPPDSim Tool: Could not find MCLAPPDHits in the ANNIEEvent!" << std::endl;
 			return false;
 		}
-
 		// loop over the number of lappds
 		std::map<unsigned long, std::vector<MCLAPPDHit> >::iterator itr;
 		for (itr = lappdmchits->begin(); itr != lappdmchits->end(); ++itr)
@@ -240,11 +262,21 @@ bool LAPPDSim::Execute()
 			LAPPDresponse response;
 			response.Initialise(_tf);
 
+			double maxTime = 0.0;
+			double minTime = 1000000000.0;
+
 			//loop over the hits on each lappd
 			for (int j = 0; j < mchits.size(); j++)
 			{
 				LAPPDHit ahit = mchits.at(j);
 				//Time is in [ns], we need [ps] for the LAPPDresponse class' methods.
+				if(maxTime < ahit.GetTime()){
+					maxTime = ahit.GetTime();
+				}
+				if(minTime > ahit.GetTime()){
+					minTime = ahit.GetTime();
+				}
+
 				double atime = ahit.GetTime()*1000.;
 				//local position is in [m], we need [mm] for the LAPPDresponse class' methods.
 				vector<double> localpos = ahit.GetLocalPosition();
@@ -252,10 +284,15 @@ bool LAPPDSim::Execute()
 				double para = localpos.at(0) * 1000;
 				//Add the traces to retrieve them later
 				response.AddSinglePhotonTrace(trans, para, atime);
+				// std::cout << "Time[ns] " << ahit.GetTime() << std::endl;
 			}
-
+			//cout << actualTubeNo << " time difference " << maxTime - minTime << endl;
 			vector<Waveform<double>> Vwavs;
+			vector<Waveform<double>> VwavsReference;
 			Vwavs.clear();
+			VwavsReference.clear();
+
+			double startTracingTime = -10000.0;// -100000.0;
 			//loop over the channels on each LAPPD
 			//Positive numbers describe one side, negative numbers the other side in a way, that left number = -right numbers
 			for (int i = -30; i < 31; i++)
@@ -264,53 +301,30 @@ bool LAPPDSim::Execute()
 				{
 					continue;
 				}
+
 				//Retrieve the traces, which were stored with the AddSinglePhotonTrace method
-				Waveform<double> awav = response.GetTrace(i, 0.0, 100, 256, 1.0);
+				//I get the following GetTrace(i, time of the start of the sample (calculated from the previous ones), size of the sample from the Gaussian distribution, 1, 1.0)
+				Waveform<double> awavReference = response.GetTrace(i, 0.0, 100, 256, 1.0);
+
+				Waveform<double> awav = response.GetTrace(i, startTracingTime, 50, 30000, 1.0); //-1000000
 				//std::cout << "Start time " << awav.GetStartTime() << std::endl;
+				VwavsReference.push_back(awavReference);
 				Vwavs.push_back(awav);
 			}
 
-			//Trigger implementation
-			int adjacentCounter = 0;
-			std::vector<int> timeStampsOfTrigger;
-			std::vector<int> numbersAboveTrigger;
-			int sampleAtTrigger = 0;
-			int numberOfSamples = Vwavs[0].GetSamples()->size();
-			//Only use one side to trigger.
-			//One needs still to decide, which side it should be
-			for(int iSample = 0; iSample < numberOfSamples; iSample++){
-				for(int iWaveform = 0; iWaveform < Vwavs.size()/2; iWaveform++){
-					std::vector<double>* oneWaveform = Vwavs[iWaveform].GetSamples();
-					if(abs(oneWaveform->at(iSample)) > _threshold){
-						adjacentCounter++;
-					}
-					else{
-						if(adjacentCounter >= _number_adjacent_triggers){
-							sampleAtTrigger = iSample;
-							break;
-						}
-					}
-				}
-				break;
+
+			// std::vector<std::vector<std::vector<std::pair<int, vector<double> > > > > triggeredWaveformsNew = triggerObject->TriggerWaveforms(Vwavs, actualTubeNo);
+			//entry 0 is the one side of the LAPPD, entry 1 is the other side.
+			//Vector(sides)<vector(trigger number)<vector(channels)<Waveform>>>
+			std::vector< std::vector< std::vector<Waveform<double>> > > resultWaveformsAllTriggerBothSides = triggerObject->TriggerWaveforms(Vwavs, actualTubeNo, startTracingTime);
+			bool draw = false;
+			std::vector<Waveform<double>> firstWaveform;
+			if((resultWaveformsAllTriggerBothSides.at(0).size() > 0) && (resultWaveformsAllTriggerBothSides.at(1).size() > 0)){
+				firstWaveform = resultWaveformsAllTriggerBothSides.at(0).at(0);
+				std::vector<Waveform<double>> firstWaveformRight = resultWaveformsAllTriggerBothSides.at(1).at(0);
+				firstWaveform.insert(firstWaveform.end(), firstWaveformRight.begin(), firstWaveformRight.end());
+				draw = true;
 			}
-
-			vector<Waveform<double>> triggeredWaveforms;
-			for(int iWaveform = 0; iWaveform < Vwavs.size(); iWaveform++){
-				std::vector<double>* oneWaveform = Vwavs[iWaveform].GetSamples();
-				Waveform<double> aTriggeredWaveform;
-				std::vector<double> triggeredSample;
-				for(int iSample = 0; iSample < numberOfSamples; iSample++){
-					if(iSample >= (sampleAtTrigger - _number_look_back)){
-						triggeredSample.push_back(oneWaveform->at(iSample));
-					}
-				}
-				aTriggeredWaveform.SetSamples(triggeredSample);
-				aTriggeredWaveform.SetStartTime(sampleAtTrigger);
-				triggeredWaveforms.push_back(aTriggeredWaveform);
-			}
-
-
-
 
 			//Get the channels of each LAPPD
 			std::map<unsigned long, Channel>* lappdchannel = thelappd->GetChannels();
@@ -321,7 +335,7 @@ bool LAPPDSim::Execute()
 			{
 
 				Channel achannel = chitr->second;
-				//cout<<"LAPPDnumerology: "<< achannel.GetStripSide() << " " << achannel.GetChannelID()<<" "<<achannel.GetStripNum()<<" "<<numberOfLAPPDChannels<<endl;
+				// cout<<"LAPPDnumerology: "<< achannel.GetStripSide() << " " << achannel.GetChannelID()<<" "<<achannel.GetStripNum()<<" "<<numberOfLAPPDChannels<<endl;
 				//achannel->Print();
 				//This assignment uses the following numbering scheme:
 				//Channelkey 0-29 is the one side, Channelkey 30-59 is the other side in a way that 0 is the left side of the strip, where 30 denotes the right side.
@@ -331,21 +345,28 @@ bool LAPPDSim::Execute()
 					int number = achannel.GetStripNum();
 					// cout << "number " << number << endl;
 					LAPPDWaveforms->insert(pair<unsigned long, Waveform<double>>(achannel.GetChannelID(), Vwavs[number]));
-					TriggeredLAPPDWaveforms->insert(pair<unsigned long, Waveform<double>>(achannel.GetChannelID(), triggeredWaveforms[number]));
+					if(draw){
+						TriggeredLAPPDWaveforms->insert(pair<unsigned long, Waveform<double>>(achannel.GetChannelID(), firstWaveform[number]));
+					}
 				}
 				else
 				{
 					int number = achannel.GetStripNum() + 1;
 					// cout << "number " << number << endl;
 					LAPPDWaveforms->insert(pair<unsigned long, Waveform<double>>(achannel.GetChannelID(), Vwavs[numberOfLAPPDChannels - number]));
-					TriggeredLAPPDWaveforms->insert(pair<unsigned long, Waveform<double>>(achannel.GetChannelID(), triggeredWaveforms[numberOfLAPPDChannels - number]));
+					if(draw){
+						TriggeredLAPPDWaveforms->insert(pair<unsigned long, Waveform<double>>(achannel.GetChannelID(), firstWaveform[numberOfLAPPDChannels - number]));
+					}
 				}
 
 			}
 			//Waveforms are drawn
 			if (_display_config > 0)
 			{
-				_display->RecoDrawing(_event_counter, actualTubeNo, Vwavs);
+				_display->RecoDrawing(_event_counter, actualTubeNo, VwavsReference);
+				if(draw){
+					_display->RecoDrawingTriggered(_event_counter, actualTubeNo, firstWaveform);
+				}
 				//This command is used to display a set of histograms and then wait for input to display the next set.
 				if (_display_config == 2)
 				{

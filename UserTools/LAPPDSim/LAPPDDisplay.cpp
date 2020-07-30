@@ -13,7 +13,7 @@
  * @param filePath           Path and name of the output root file.
  */
 LAPPDDisplay::LAPPDDisplay(std::string filePath, int confignumber):_LAPPD_sim_app(nullptr),_LAPPD_MC_all_canvas(nullptr),_LAPPD_MC_canvas(nullptr),
-_LAPPD_MC_time_canvas(nullptr),_LAPPD_all_waveforms_canvas(nullptr),_LAPPD_waveform_canvas(nullptr),_all_hits(nullptr),_output_file(nullptr),
+_LAPPD_MC_time_canvas(nullptr),_LAPPD_all_waveforms_canvas(nullptr),_LAPPD_waveform_canvas(nullptr),_LAPPD_all_waveforms_canvas_triggered(nullptr),_LAPPD_waveform_canvas_triggered(nullptr),_all_hits(nullptr),_output_file(nullptr),
 _output_file_name(filePath),_config_number(confignumber)
 {
   //TApplication
@@ -47,9 +47,24 @@ _output_file_name(filePath),_config_number(confignumber)
 		_LAPPD_all_waveforms_canvas->GetPad(1)->SetRightMargin(0.15);
 		_LAPPD_all_waveforms_canvas->GetPad(2)->SetRightMargin(0.15);
 
+
+		//Canvas for all waveforms in one plot: Strip number versus time with voltage as colour code
+		_LAPPD_all_waveforms_canvas_triggered = new TCanvas("LAPPDAllWaveformCanvasTriggered", "All waveforms triggered", canvwidth, canvheight);
+		_LAPPD_all_waveforms_canvas_triggered->Divide(2, 1, 0.015, 0.01, 0);
+		_LAPPD_all_waveforms_canvas_triggered->GetPad(1)->SetRightMargin(0.15);
+		_LAPPD_all_waveforms_canvas_triggered->GetPad(2)->SetRightMargin(0.15);
+
+
     //Canvas for single waveforms: Voltage versus time
     _LAPPD_waveform_canvas = new TCanvas("LAPPDWaveformCanvas", "One waveform", canvwidth, canvheight);
     _LAPPD_waveform_canvas->Divide(2, 1, 0.015, 0.01, 0);
+
+		//Canvas for single waveforms: Voltage versus time
+		_LAPPD_waveform_canvas_triggered = new TCanvas("LAPPDWaveformCanvasTriggered", "One waveform triggered", canvwidth, canvheight);
+  	_LAPPD_waveform_canvas_triggered->Divide(2, 1, 0.015, 0.01, 0);
+
+
+
 	}
 
   //initial opening of the output file
@@ -85,6 +100,14 @@ LAPPDDisplay::~LAPPDDisplay()
     {
       delete _LAPPD_waveform_canvas;
     }
+		if (gROOT->FindObject("LAPPDWaveformCanvasTriggered") != nullptr)
+		{
+			delete _LAPPD_waveform_canvas_triggered;
+		}
+		if (gROOT->FindObject("LAPPDAllWaveformCanvasTriggered") != nullptr)
+		{
+			delete _LAPPD_all_waveforms_canvas_triggered;
+		}
 	}
 	delete _LAPPD_sim_app;
 	_output_file->Close();
@@ -386,6 +409,132 @@ void LAPPDDisplay::RecoDrawing(int eventCounter, unsigned long tubeNumber, std::
 
 	_LAPPD_all_waveforms_canvas->Modified();
 	_LAPPD_all_waveforms_canvas->Update();
+	}
+
+	leftAllWaveforms->Clear();
+	rightAllWaveforms->Clear();
+
+}
+
+
+
+/**
+ * Method RecoDrawing:   This method draws the waveforms. One histogram for the left and the right side of each strip:
+ *                       Strip number as y-axis and time as x-axis and voltage as colour code.
+ * @param eventCounter   Number of the event used for the names of the histograms
+ * @param tubeNumber     The detector ID of the LAPPD also used for the names of the histograms.
+ * @param waveformVector The vector, from which the waveforms can be retrieved
+ */
+void LAPPDDisplay::RecoDrawingTriggered(int eventCounter, unsigned long tubeNumber, std::vector<Waveform<double>> waveformVector)
+{
+  //Creation of the histogram names
+	std::cout << "Event number " << eventCounter << std::endl;
+  std::string eventnumber = boost::lexical_cast < std::string > (eventCounter);
+	std::string lappdnumber = boost::lexical_cast < std::string > (tubeNumber);
+	std::string nameleft = "Triggeredevent" + eventnumber + "lappd" + lappdnumber + "left";
+	const char *d = nameleft.c_str();
+  std::string nameright = "Triggeredevent" + eventnumber + "lappd" + lappdnumber + "right";
+	const char *e = nameright.c_str();
+	double nbinsx = 25.6;
+
+  //Initialisation of the histograms
+  TH2D* leftAllWaveforms = new TH2D(d, d, 256, 0.0, nbinsx, 30, 0.0, 30.0);
+	TH2D* rightAllWaveforms = new TH2D(e, e, 256, 0.0, nbinsx, 30, 0.0, 30.0);
+
+  //loop over all strips
+	for (int i = 0; i < 30; i++)
+	{
+    //Get the samples from the waveforms. For the right side 59-i is used,
+    //because in the LAPPDSim tool the stripes range from -30 to 30, with
+    //-30 is the left side of the strip and 30 the right side. The waveforms are
+    //saved in a way, that 0 equals -30 and 59 equals 30. So for the right side
+    //one needs to start with the last entry.
+		std::vector<double>* samplesleft = waveformVector[i].GetSamples();
+		std::cout << "Left start times " << "strip " << i << " " << waveformVector[i].GetStartTime() << std::endl; 
+		std::vector<double>* samplesright = waveformVector[59 - i].GetSamples();
+
+    //Creation of histogram names for every strip
+    std::string stripNumber = boost::lexical_cast < std::string > (i);
+    std::string nameWaveformLeft = "Triggeredevent" + eventnumber + "lappd" + lappdnumber + "strip" + stripNumber + "left";
+    std::string nameWaveformRight = "Triggeredevent" + eventnumber + "lappd" + lappdnumber + "strip" + stripNumber + "right";
+    const char *waveformLeftChar = nameWaveformLeft.c_str();
+    const char *waveformRightChar = nameWaveformRight.c_str();
+
+    //Initialisation of the histograms
+    TH1D* waveformLeft = new TH1D(waveformLeftChar, waveformLeftChar, 256, 0, 25.6);
+    TH1D* waveformRight = new TH1D(waveformRightChar, waveformRightChar, 256, 0, 25.6);
+
+    //loop over the samples
+		for (int j = 0; j < samplesleft->size(); j++)
+		{
+      //The samples range from 0 to 256, which equals 0 to 25.6 ns.
+      //Therefore one needs the sample number divided with 10 to get ns.
+      //0.00001 is added to the time to avoid binning effects.
+			double time = ((double)j/10) + 0.00001;
+
+      //Filling of the histograms.
+      waveformLeft->Fill(time, -samplesleft->at(j));
+      waveformRight->Fill(time, -samplesright->at(j));
+
+			leftAllWaveforms->Fill(time, i, -samplesleft->at(j));
+			rightAllWaveforms->Fill(time, i, -samplesright->at(j));
+		}
+    //Cosmetics
+    waveformLeft->GetXaxis()->SetTitle("Time [ns]");
+    waveformLeft->GetYaxis()->SetTitle("Voltage [mV]");
+    waveformLeft->GetYaxis()->SetTitleOffset(1.4);
+		waveformLeft->SetOption("COLZ");
+    waveformLeft->Write();
+
+    waveformRight->GetXaxis()->SetTitle("Time [ns]");
+    waveformRight->GetYaxis()->SetTitle("Voltage [mV]");
+    waveformRight->GetYaxis()->SetTitleOffset(1.4);
+    waveformRight->SetOption("COLZ");
+    waveformRight->Write();
+
+    //Canvas adjustments
+    if(_config_number == 2){
+      _LAPPD_waveform_canvas_triggered->cd(1);
+      waveformLeft->SetStats(0);
+      waveformLeft->Draw("HIST");
+
+      _LAPPD_waveform_canvas_triggered->cd(2);
+      waveformRight->SetStats(0);
+      waveformRight->Draw("HIST");
+
+      _LAPPD_waveform_canvas_triggered->Modified();
+    	_LAPPD_waveform_canvas_triggered->Update();
+      }
+	}
+
+  //Cosmetics
+	leftAllWaveforms->GetXaxis()->SetTitle("Time [ns]");
+	leftAllWaveforms->GetYaxis()->SetTitle("Strip number");
+	leftAllWaveforms->GetZaxis()->SetTitle("Voltage [mV]");
+	//leftAllWaveforms->GetZaxis()->SetTitleOffset(1.4);
+	leftAllWaveforms->SetOption("COLZ");
+	leftAllWaveforms->Write();
+
+	rightAllWaveforms->GetXaxis()->SetTitle("Time [ns]");
+	rightAllWaveforms->GetYaxis()->SetTitle("Strip number");
+	rightAllWaveforms->GetZaxis()->SetTitle("Voltage [mV]");
+	rightAllWaveforms->SetOption("COLZ");
+	//rightAllWaveforms->GetZaxis()->SetTitleOffset(1.4);
+	rightAllWaveforms->Write();
+
+  //Canvas adjustments
+	if(_config_number == 2)
+	{
+	_LAPPD_all_waveforms_canvas_triggered->cd(1);
+	leftAllWaveforms->SetStats(0);
+	leftAllWaveforms->Draw("COLZ");
+
+	_LAPPD_all_waveforms_canvas_triggered->cd(2);
+	rightAllWaveforms->SetStats(0);
+	rightAllWaveforms->Draw("COLZ");
+
+	_LAPPD_all_waveforms_canvas_triggered->Modified();
+	_LAPPD_all_waveforms_canvas_triggered->Update();
 	}
 
 	leftAllWaveforms->Clear();

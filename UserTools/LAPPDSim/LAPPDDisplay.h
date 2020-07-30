@@ -31,6 +31,7 @@ public:
   void MCTruthDrawing(int eventnumber, unsigned long actualTubeNo, std::vector <MCLAPPDHit> mchits);
   void FinaliseHistoAllLAPPDs();
   void RecoDrawing(int eventCounter, unsigned long tubeNumber, std::vector<Waveform<double>> waveformVector);
+  void RecoDrawingTriggered(int eventCounter, unsigned long tubeNumber, std::vector<Waveform<double>> waveformVector);
 private:
   TApplication* _LAPPD_sim_app;
   TCanvas* _LAPPD_MC_all_canvas;
@@ -38,6 +39,8 @@ private:
   TCanvas* _LAPPD_MC_time_canvas;
   TCanvas* _LAPPD_all_waveforms_canvas;
   TCanvas* _LAPPD_waveform_canvas;
+  TCanvas* _LAPPD_all_waveforms_canvas_triggered;
+  TCanvas* _LAPPD_waveform_canvas_triggered;
   TH2D* _all_hits;
   TFile* _output_file;
   int _config_number;

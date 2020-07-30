@@ -30,7 +30,6 @@ class LAPPDSim: public Tool {
   bool Execute();
   bool Finalise();
   Waveform<double> SimpleGenPulse(vector<double> pulsetimes);
-
  private:
    TRandom3* myTR;
    TFile* _tf;

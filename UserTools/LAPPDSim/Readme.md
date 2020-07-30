@@ -25,5 +25,5 @@ It is to note that one might need to adjust the inline number in the ToolChainCo
 
 PathToPulsecharacteristics /nashome/m/mstender/ToolAnalysisForFelix/ToolAnalysis/UserTools/LAPPDSim/pulsecharacteristics.root #This is the path to the pulsecharacteristics.root file, which must be set before running the tool
 EventDisplay 2 #0 = no event display; 1 = histograms will be written, but not displayed; 2 histograms will be displayed and written
-OutputFile /nashome/m/mstender/ToolAnalysisForFelix/ToolAnalysis/LAPPDHistograms.root #This is the path to the output file. This must be also set befor running the tool.
+OutputFile /nashome/m/mstender/ToolAnalysisForFelix/ToolAnalysis/LAPPDHistograms.root #This is the path to the output file. This must be also set before running the tool.
 ArtificialEvent 1 #1 = artificial Events will be used; 0 = MC Events will be used;
