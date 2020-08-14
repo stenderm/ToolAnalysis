@@ -110,5 +110,6 @@ if (tool=="MrdPaddleEfficiencyPreparer") ret=new MrdPaddleEfficiencyPreparer;
 if (tool=="MrdPaddleEfficiencyCalc") ret=new MrdPaddleEfficiencyCalc;
 if (tool=="LoadRawData") ret=new LoadRawData;
 if (tool=="ClusterClassifiers") ret=new ClusterClassifiers;
+if (tool=="TestLAPPDSimWaveforms") ret=new TestLAPPDSimWaveforms;
 return ret;
 }

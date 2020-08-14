@@ -2,7 +2,7 @@
 #include "LAPPDTrigger.h"
 #include <unistd.h>
 
-LAPPDSim::LAPPDSim():Tool(),myTR(nullptr),_tf(nullptr),_event_counter(0),_file_number(0),_display_config(0),_is_artificial(false),_display(nullptr),_geom(nullptr),
+LAPPDSim::LAPPDSim():Tool(),_verbose(0),myTR(nullptr),_tf(nullptr),_event_counter(0),_file_number(0),_display_config(0),_is_artificial(false),_display(nullptr),_geom(nullptr),
 _threshold(0.0),_number_look_back(0),_number_adjacent_triggers(0)
 {
 }
@@ -26,6 +26,11 @@ bool LAPPDSim::Initialise(std::string configfile, DataModel &data)
 	//Config number for the displaying
 	m_variables.Get("EventDisplay", _display_config);
 	std::cout << "DisplayNumber " << _display_config << std::endl;
+
+	//Verbose numbers
+	m_variables.Get("verbose", _verbose);
+	std::cout << "Verbose " << _verbose << std::endl;
+
 
 	//Whether artifical events or MC events are used
 	m_variables.Get("ArtificialEvent", _is_artificial);
@@ -292,7 +297,7 @@ bool LAPPDSim::Execute()
 			Vwavs.clear();
 			VwavsReference.clear();
 
-			double startTracingTime = -10000.0;// -100000.0;
+			double startTracingTime = -20000.0;// -100000.0;
 			//loop over the channels on each LAPPD
 			//Positive numbers describe one side, negative numbers the other side in a way, that left number = -right numbers
 			for (int i = -30; i < 31; i++)
@@ -325,7 +330,11 @@ bool LAPPDSim::Execute()
 				firstWaveform.insert(firstWaveform.end(), firstWaveformRight.begin(), firstWaveformRight.end());
 				draw = true;
 			}
-
+			if(resultWaveformsAllTriggerBothSides.at(0).size() != resultWaveformsAllTriggerBothSides.at(1).size()){
+				std::cout << "UNEVEN SIZES!!! " << actualTubeNo << std::endl;
+				std::cout << "Left " << resultWaveformsAllTriggerBothSides.at(0).size() << std::endl;
+				std::cout << "Right " << resultWaveformsAllTriggerBothSides.at(1).size() << std::endl;
+			}
 			//Get the channels of each LAPPD
 			std::map<unsigned long, Channel>* lappdchannel = thelappd->GetChannels();
 			int numberOfLAPPDChannels = lappdchannel->size();
@@ -381,13 +390,17 @@ bool LAPPDSim::Execute()
 
 		}				//end loop over LAPPDs
 
+		if(_verbose > 0){
 		std::cout << "Saving waveforms to store " << LAPPDWaveforms->size() << std::endl;
 		//The waveforms are only saved if MC events are used.
 		//The artifical events are not meant to be saved, because they cannot be used in any other tool,
 		//since there won't be any hit information in the MCHits or MCLAPPDHits
 		cout << "Saving LAPPDWaveforms" << endl;
+		}
 		m_data->Stores.at("ANNIEEvent")->Set("LAPPDWaveforms", LAPPDWaveforms, true);
+		if(_verbose > 0){
 		cout << "Saving TriggeredLAPPDWaveforms" << endl;
+	}
 		m_data->Stores.at("ANNIEEvent")->Set("TriggeredLAPPDWaveforms", TriggeredLAPPDWaveforms, true);
 		// cout << "Delete LAPPDWaveforms" << endl;
 		// // delete LAPPDWaveforms;

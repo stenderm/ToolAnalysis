@@ -22,6 +22,7 @@ class Waveform : public SerialisableObject{
 	inline T GetSample(int i) const {return fSamples.at(i);}
 
 	inline void SetStartTime(double ts) {fStartTime=ts;}
+	inline void SetSample(int i, double voltage){fSamples.at(i) = voltage;}
 	inline void SetSamples(std::vector<T> sam) {fSamples=sam;}
 	inline void PushSample(T asample) {fSamples.push_back(asample);}
 	inline void ClearSamples() {fSamples.clear();}

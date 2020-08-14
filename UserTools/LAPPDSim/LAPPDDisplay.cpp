@@ -428,7 +428,6 @@ void LAPPDDisplay::RecoDrawing(int eventCounter, unsigned long tubeNumber, std::
 void LAPPDDisplay::RecoDrawingTriggered(int eventCounter, unsigned long tubeNumber, std::vector<Waveform<double>> waveformVector)
 {
   //Creation of the histogram names
-	std::cout << "Event number " << eventCounter << std::endl;
   std::string eventnumber = boost::lexical_cast < std::string > (eventCounter);
 	std::string lappdnumber = boost::lexical_cast < std::string > (tubeNumber);
 	std::string nameleft = "Triggeredevent" + eventnumber + "lappd" + lappdnumber + "left";
@@ -437,9 +436,32 @@ void LAPPDDisplay::RecoDrawingTriggered(int eventCounter, unsigned long tubeNumb
 	const char *e = nameright.c_str();
 	double nbinsx = 25.6;
 
+	double minStartTimeLeft = 1000000.0;
+	double maxStartTimeLeft = 0.0;
+	double minStartTimeRight = 1000000.0;
+	double maxStartTimeRight = 0.0;
+
+	for(int i_strip = 0; i_strip < 30; i_strip++){
+		if(minStartTimeLeft > waveformVector[i_strip].GetStartTime()){
+			minStartTimeLeft = waveformVector[i_strip].GetStartTime();
+		}
+		if(maxStartTimeLeft < waveformVector[i_strip].GetStartTime()){
+			maxStartTimeLeft = waveformVector[i_strip].GetStartTime();
+		}
+		if(minStartTimeRight > waveformVector[59 - i_strip].GetStartTime()){
+			minStartTimeRight = waveformVector[59 - i_strip].GetStartTime();
+		}
+		if(maxStartTimeRight < waveformVector[59 - i_strip].GetStartTime()){
+			maxStartTimeRight = waveformVector[59 - i_strip].GetStartTime();
+		}
+	}
+
+	double maxBinRight = maxStartTimeRight/1000 + 280 * (97.15/1000);
+	double maxBinLeft = maxStartTimeLeft/1000 + 280 * (97.15/1000);
+
   //Initialisation of the histograms
-  TH2D* leftAllWaveforms = new TH2D(d, d, 256, 0.0, nbinsx, 30, 0.0, 30.0);
-	TH2D* rightAllWaveforms = new TH2D(e, e, 256, 0.0, nbinsx, 30, 0.0, 30.0);
+  TH2D* leftAllWaveforms = new TH2D(d, d, 300, minStartTimeLeft/1000, maxBinLeft, 30, 0.0, 30.0);
+	TH2D* rightAllWaveforms = new TH2D(e, e, 300, minStartTimeRight/1000, maxBinRight, 30, 0.0, 30.0);
 
   //loop over all strips
 	for (int i = 0; i < 30; i++)
@@ -450,9 +472,10 @@ void LAPPDDisplay::RecoDrawingTriggered(int eventCounter, unsigned long tubeNumb
     //saved in a way, that 0 equals -30 and 59 equals 30. So for the right side
     //one needs to start with the last entry.
 		std::vector<double>* samplesleft = waveformVector[i].GetSamples();
-		std::cout << "Left start times " << "strip " << i << " " << waveformVector[i].GetStartTime() << std::endl; 
+		// std::cout << "Left start times " << "strip " << i << " " << waveformVector[i].GetStartTime() << std::endl;
 		std::vector<double>* samplesright = waveformVector[59 - i].GetSamples();
-
+		double leftStartTime = waveformVector[i].GetStartTime()/1000;
+		double rightStartTime = waveformVector[59 - i].GetStartTime()/1000;
     //Creation of histogram names for every strip
     std::string stripNumber = boost::lexical_cast < std::string > (i);
     std::string nameWaveformLeft = "Triggeredevent" + eventnumber + "lappd" + lappdnumber + "strip" + stripNumber + "left";
@@ -460,9 +483,12 @@ void LAPPDDisplay::RecoDrawingTriggered(int eventCounter, unsigned long tubeNumb
     const char *waveformLeftChar = nameWaveformLeft.c_str();
     const char *waveformRightChar = nameWaveformRight.c_str();
 
+		double leftMax = leftStartTime + 280 * (97.15/1000);
+		double rightMax = rightStartTime + 280 * (97.15/1000);
+
     //Initialisation of the histograms
-    TH1D* waveformLeft = new TH1D(waveformLeftChar, waveformLeftChar, 256, 0, 25.6);
-    TH1D* waveformRight = new TH1D(waveformRightChar, waveformRightChar, 256, 0, 25.6);
+    TH1D* waveformLeft = new TH1D(waveformLeftChar, waveformLeftChar, 257, leftStartTime, leftMax);
+    TH1D* waveformRight = new TH1D(waveformRightChar, waveformRightChar, 257, rightStartTime, rightMax);
 
     //loop over the samples
 		for (int j = 0; j < samplesleft->size(); j++)
@@ -470,14 +496,14 @@ void LAPPDDisplay::RecoDrawingTriggered(int eventCounter, unsigned long tubeNumb
       //The samples range from 0 to 256, which equals 0 to 25.6 ns.
       //Therefore one needs the sample number divided with 10 to get ns.
       //0.00001 is added to the time to avoid binning effects.
-			double time = ((double)j/10) + 0.00001;
+			double time = ((double)j*(97.15/1000));
 
       //Filling of the histograms.
-      waveformLeft->Fill(time, -samplesleft->at(j));
-      waveformRight->Fill(time, -samplesright->at(j));
+      waveformLeft->Fill(time+leftStartTime, -samplesleft->at(j));
+      waveformRight->Fill(time+rightStartTime, -samplesright->at(j));
 
-			leftAllWaveforms->Fill(time, i, -samplesleft->at(j));
-			rightAllWaveforms->Fill(time, i, -samplesright->at(j));
+			leftAllWaveforms->Fill(time+leftStartTime, i, -samplesleft->at(j));
+			rightAllWaveforms->Fill(time+rightStartTime, i, -samplesright->at(j));
 		}
     //Cosmetics
     waveformLeft->GetXaxis()->SetTitle("Time [ns]");

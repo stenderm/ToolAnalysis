@@ -32,7 +32,7 @@
 * @param threshold                 (double) Threshold in mV, which must be exceeded to trigger a LAPPD channel.
 * @param numberOfAdjacentTriggers  (int) Number of simultaneous trigger on adjacent strips to trigger the LAPPD.
 */
-LAPPDTrigger::LAPPDTrigger(int numberOfLAPPDs, int numberOfChannels, double threshold, int numberOfAdjacentTriggers):_LAPPD_sample_times(nullptr), _trigger_threshold(threshold), _number_adjacent_samples(numberOfAdjacentTriggers), _starting_sample(0)
+LAPPDTrigger::LAPPDTrigger(int numberOfLAPPDs, int numberOfChannels, double threshold, int numberOfAdjacentTriggers):_LAPPD_sample_times(nullptr), _LAPPD_channel_lengths(nullptr), _trigger_threshold(threshold), _number_adjacent_samples(numberOfAdjacentTriggers), _starting_sample(0)
 {
   //Create a distribution for the sample times. Sigma is 1.27 ps, mean is 97.15 ps.
   //ToDo: Check the sigma.
@@ -40,6 +40,9 @@ LAPPDTrigger::LAPPDTrigger(int numberOfLAPPDs, int numberOfChannels, double thre
 
   //Vector of LAPPDs of vector of Channels of vector of 256 sample sizes
   _LAPPD_sample_times = new std::vector<std::vector<std::vector<double> > >;
+
+  //Vector of LAPPDs of vector of Channels of the length of the waveform consisting of the 256 samples
+  _LAPPD_channel_lengths = new std::vector<std::vector<double> >;
 
   //Loop over all LAPPDs
   for(int i = 0; i < numberOfLAPPDs; i++){
@@ -67,14 +70,20 @@ LAPPDTrigger::LAPPDTrigger(int numberOfLAPPDs, int numberOfChannels, double thre
   //It is obtained by pulling a random sample number of a uniformly distributed distribution
   _starting_sample = UniformDeviate(rand()) * 256;
 
-  // // DEBUG------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-  // for(size_t i_LAPPD = 0; i_LAPPD < _LAPPD_sample_times->size(); i_LAPPD++){
-  //   for(size_t i_Channel = 0; i_Channel < _LAPPD_sample_times->at(i_LAPPD).size(); i_Channel++){
-  //     for(size_t i_Sample = 0; i_Sample < _LAPPD_sample_times->at(i_LAPPD).at(i_Channel).size(); i_Sample++){
-  //       std::cout << "LAPPDNumber: " << i_LAPPD << " ChannelNumber: " << i_Channel << " SampleNumber: " << i_Sample << " SampleTime " << _LAPPD_sample_times->at(i_LAPPD).at(i_Channel).at(i_Sample) << std::endl;
-  //     }
-  //   }
-  // }
+  // DEBUG------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  for(size_t i_LAPPD = 0; i_LAPPD < _LAPPD_sample_times->size(); i_LAPPD++){
+    std::vector<double> lengths;
+    for(size_t i_Channel = 0; i_Channel < _LAPPD_sample_times->at(i_LAPPD).size(); i_Channel++){
+      double waveformLength = 0.0;
+      for(size_t i_Sample = 0; i_Sample < _LAPPD_sample_times->at(i_LAPPD).at(i_Channel).size(); i_Sample++){
+        waveformLength += _LAPPD_sample_times->at(i_LAPPD).at(i_Channel).at(i_Sample);
+      }
+        // std::cout << "LAPPDNumber: " << i_LAPPD << " ChannelNumber: " << i_Channel << " SampleNumber: " << waveformLength << std::endl;
+        lengths.push_back(waveformLength);
+    }
+    _LAPPD_channel_lengths->push_back(lengths);
+    lengths.clear();
+  }
 
 
 
@@ -91,108 +100,8 @@ LAPPDTrigger::LAPPDTrigger(int numberOfLAPPDs, int numberOfChannels, double thre
 * @param LAPPDNumber               (int) The number of the current LAPPD to trigger.
 */
 std::vector< std::vector< std::vector<Waveform<double>> > > LAPPDTrigger::TriggerWaveforms(std::vector<Waveform<double> > untriggeredWaveforms, int LAPPDNumber, double startTracingTime){
-  //std::vector<std::vector<std::pair<double,double> > > sampledWaveforms;
 
-  //Vector of channels of vector of samples of pairs corresponding to the sample number and a vector of two doubles corresponding to the sample size and the sample voltage
-  std::vector<std::vector<std::pair<int, vector<double> > > > sampledWaveforms;
-
-  //Loop over channels
-  for(size_t i_Channel = 0; i_Channel < untriggeredWaveforms.size(); i_Channel++){
-
-    //Time of the start of the sample currently looked at in the sampled waveforms
-    double startSampleTime = 0.0;
-    //Voltage to fill in the sample currently looked at
-    double voltageToFill = 0;
-
-    //Number of the sample in the sampled waveforms
-    int sampleCounter = _starting_sample;
-
-    //Get the random but constant sample size, which was created in the constructor for this particular LAPPD at that particular channel for the starting sample
-    double sampleSize = _LAPPD_sample_times->at(LAPPDNumber).at(i_Channel).at(_starting_sample%256);
-
-    //Time of the end of the sample currently looked at in the samples waveforms
-    double endSampleTime = startSampleTime + sampleSize;
-
-    //Vector of all samples of one waveform, with <sample size, <sample size, sample voltage> >
-    std::vector<std::pair<int,vector<double> > > sampledVoltages;
-
-    //Loop over samples
-    for(size_t i_Sample = 0; i_Sample < untriggeredWaveforms.at(i_Channel).GetSamples()->size(); i_Sample++){
-      // std::cout << "ChannelNumber " << i_Channel << "SampleNumber " << i_Sample << " Voltage " << untriggeredWaveforms.at(i_Channel).GetSample(i_Sample) << std::endl;
-
-      //Original sample size of the untriggered waveforms used for the GetTrace()-Method of the LAPPDresponse class
-      //ToDo: Implement this as a parameter for this function
-      double originalSize = 50;
-
-      //Get the voltage of the untriggered waveform at the sample i_Sample
-      double voltage = untriggeredWaveforms.at(i_Channel).GetSample(i_Sample);
-
-      //Calculate the start time of the sample of the untriggered waveform
-      double startTemplateTime = i_Sample * originalSize;
-
-      //Calculate the end time of the sample of the untriggered waveform
-      double endTemplateTime = (i_Sample + 1) * originalSize;
-
-      //If the end time of the sample of the sampled waveform is bigger than the end time of the sample of the untriggered waveforms,
-      //then the percentage of voltage from the untriggered waveforms can be filled in the sample of the sampled waveforms, since
-      //the constant sized sample is at an end
-      // |....|....|....|....| <-constant samples
-      // |vvvv|
-      // |.......|........|......| <- samples with different size
-      //
-      if(endSampleTime > endTemplateTime){
-        //Calculate what percentage the constant size sample makes up in the sample with different size and add this to the voltage of the non-constant sample
-        voltageToFill += ((endTemplateTime - startSampleTime)/sampleSize)*voltage;
-
-        //When in last iteration the values need to be pushed into the vector
-        if(i_Sample == untriggeredWaveforms.at(i_Channel).GetSamples()->size()-1){
-          //vector of sample size and sample voltage
-          std::vector<double> sizeVoltage;
-          //Fill the size of the sample in the vector
-          sizeVoltage.push_back(sampleSize);
-          //Fill the calculated voltage in the vector
-          sizeVoltage.push_back(voltageToFill);
-          //Make a pair of the sample number an the vector above and push it in the sample vector
-          sampledVoltages.push_back( std::pair<int,std::vector<double> >(sampleCounter%256, sizeVoltage));
-        }
-      }
-      //Now the end time of the constant sample is bigger than the non-constant one, so that the calculation of
-      //the voltage of the non-constant sample is finished
-      // |....|....|....|....| <-constant samples
-      //      |vv|
-      // |.......|........|......| <- samples with different size
-      else{
-        //Caclulate what percentage the constant size sample makes up in the sample with different size and add this to the voltage of the non-constant sample
-        voltageToFill += ((endSampleTime - startTemplateTime)/sampleSize)*voltage;
-        //vector of sample size and sample voltage
-        std::vector<double> sizeVoltage;
-        //Fill the size of the sample in the vector
-        sizeVoltage.push_back(sampleSize);
-        //Fill the calculated voltage in the vector
-        sizeVoltage.push_back(voltageToFill);
-        //Make a pair of the sample number an the vector above and push it in the sample vector
-        sampledVoltages.push_back( std::pair<int,std::vector<double> >(sampleCounter%256, sizeVoltage));
-        //Reset values
-        sizeVoltage.clear();
-        voltageToFill = 0;
-        //Get the current sample size
-        sampleSize = _LAPPD_sample_times->at(LAPPDNumber).at(i_Channel).at(sampleCounter%256);
-        //Calculate the new sample start time
-        startSampleTime += sampleSize;
-        //Go to the next sample in the non-constant sample waveform
-        sampleCounter++;
-        //Get the sample size of the next sample
-        sampleSize = _LAPPD_sample_times->at(LAPPDNumber).at(i_Channel).at(sampleCounter%256);
-        //Calculate the new sample end time
-        endSampleTime = startSampleTime + sampleSize;
-      }
-    }//end of sample loop
-
-    sampledWaveforms.push_back(sampledVoltages);
-    sampledVoltages.clear();
-  }//end of channel loop
-
-
+  double originalSampleSize = 50;
 
   //Number of the sample at which the trigger occured
   int triggerSample = 0;
@@ -202,23 +111,18 @@ std::vector< std::vector< std::vector<Waveform<double>> > > LAPPDTrigger::Trigge
   std::vector<std::pair<int, int> > vectorOfTriggerSamplesFirstSide;
   std::vector<std::pair<int, int> > vectorOfTriggerSamplesSecondSide;
 
-  size_t numberOfSamples = 100000000;
-
-  //Get the minimum number of samples
-  for (size_t i = 0; i < 60; i++) {
-    if(sampledWaveforms.at(i).size() <  numberOfSamples){
-      numberOfSamples = sampledWaveforms.at(i).size();
-    }
-  }
+  //Get the number of samples of the first of the waveform , since all waveforms have the same size.
+  int numberOfSamples = untriggeredWaveforms.at(0).GetSamples()->size();
 
   //Loop over samples
   for (size_t i_sample = 0; i_sample < numberOfSamples; i_sample++) {
     adjacentCounter = 0;
-    size_t testNumber = (size_t)(sampledWaveforms.size()/2);
+
     //Loop over channels (First side)
-    for (size_t i_channel = 0; i_channel < (size_t)(sampledWaveforms.size()/2); i_channel++) {
+    for (size_t i_channel = 0; i_channel < (size_t)(untriggeredWaveforms.size()/2); i_channel++) {
+
       //if trigger threshold is exceeded add one to the adjacent Counter
-      if(abs(sampledWaveforms.at(i_channel).at(i_sample).second.at(1)) > _trigger_threshold){
+      if(abs(untriggeredWaveforms.at(i_channel).GetSample(i_sample)) > _trigger_threshold){
         adjacentCounter++;
 
       //if trigger threshold is not exceeded, check, whether sufficient adjacent strips were triggered
@@ -226,12 +130,11 @@ std::vector< std::vector< std::vector<Waveform<double>> > > LAPPDTrigger::Trigge
         if(adjacentCounter >= _number_adjacent_samples){
           //Save at which sample the trigger fired at which channel
           triggerSample = i_sample;
-          std::cout << "LEFT" << std::endl;
-          std::cout << "LAPPDNumber " << LAPPDNumber << std::endl;
-          std::cout << "i_sample " << i_sample << std::endl;
           vectorOfTriggerSamplesFirstSide.push_back(std::pair<int,int>(i_channel,i_sample));
           //Since 256 samples will be read out, no trigger is possible for the next 256 samples, so skip these
-          i_sample += 256;
+          //Since we are currently looking at samples of the size of 50 ps, we need to skip about 500
+          //ToDo: Finetune this number?
+          i_sample += 500;
           //reset the adjacentCounter
           adjacentCounter = 0;
           //Leave the channel loop for this sample and the next 256 samples, since a trigger is found
@@ -245,22 +148,20 @@ std::vector< std::vector< std::vector<Waveform<double>> > > LAPPDTrigger::Trigge
   for (size_t i_sample = 0; i_sample < numberOfSamples; i_sample++) {
     adjacentCounter = 0;
     //Loop over channels (Second side)
-    for (size_t i_channel = (size_t)(sampledWaveforms.size()/2); i_channel < sampledWaveforms.size(); i_channel++) {
+    for (size_t i_channel = (size_t)(untriggeredWaveforms.size()/2); i_channel < untriggeredWaveforms.size(); i_channel++) {
       //if trigger threshold is exceeded add one to the adjacent Counter
-      if(abs(sampledWaveforms.at(i_channel).at(i_sample).second.at(1)) > _trigger_threshold){
+      if(abs(untriggeredWaveforms.at(i_channel).GetSample(i_sample)) > _trigger_threshold){
         adjacentCounter++;
 
       //if trigger threshold is not exceeded, check, whether sufficient adjacent strips were triggered
-
-        if(adjacentCounter >= _number_adjacent_samples){
+      if(adjacentCounter >= _number_adjacent_samples){
           //Save at which sample the trigger fired at which channel
           triggerSample = i_sample;
-          std::cout << "RIGHT" << std::endl;
-          std::cout << "LAPPDNumber " << LAPPDNumber << std::endl;
-          std::cout << "i_sample " << i_sample << std::endl;
           vectorOfTriggerSamplesSecondSide.push_back(std::pair<int,int>(i_channel,i_sample));
           //Since 256 samples will be read out, no trigger is possible for the next 256 samples, so skip these
-          i_sample += 256;
+          //Since we are currently looking at samples of the size of 50 ps, we need to skip about 500
+          //ToDo: Finetune this number?
+          i_sample += 500;
           //reset the adjacentCounter
           adjacentCounter = 0;
           //Leave the channel loop for this sample and the next 256 samples, since a trigger is found
@@ -269,10 +170,6 @@ std::vector< std::vector< std::vector<Waveform<double>> > > LAPPDTrigger::Trigge
       }
     }//end of channel loop
   }//end of sample loop
-
-
-
-  std::cout << "End of triggering " << std::endl;
 
   //Vector of Channels of vector of channels of vector of samples
   std::vector<std::vector<std::pair<int, vector<double> > > > triggeredWaveformsLeft;
@@ -283,12 +180,16 @@ std::vector< std::vector< std::vector<Waveform<double>> > > LAPPDTrigger::Trigge
   //Distribution for the time the LAPPD needs to start the readout after a trigger occured
   //Mean: 20 ns; Sigma: 2.5 ns
   TF1 *triggerTimeGaussian = new TF1("triggerTimeGaussian", "TMath::Gaus(x, 20.0, 2.5)", 0, 100);
+
   //Distribution of the number of samples, which get the curent injection
-  //Mean: 8.5; Sigma: 1
+  //Originally, I used Mean: 8.5; Sigma: 1 for the already sampled waveform
+  //Now, I use Mean: 16.5; Sigma: 1 for the constant sized waveforms
   TF1 *triggerSampleSize = new TF1("triggerSampleSize", "TMath::Gaus(x, 8.5, 1)", 0, 100);
+
   //Distribution of the voltage of the current injection
   //Mean: 80 mV; Sigma: 20 mV
   TF1 *triggerVoltage = new TF1("triggerSampleSize", "TMath::Gaus(x, 80, 20)", 0, 100);
+
   //Distribution of the wraparound delay
   //Mean: 560 ps; Sigma: 20 ps
   TF1 *wraparoundDelay = new TF1("wraparoundDelay", "TMath::Gaus(x, 560, 20)", 0, 1000);
@@ -301,8 +202,7 @@ std::vector< std::vector< std::vector<Waveform<double>> > > LAPPDTrigger::Trigge
   std::vector< std::vector<Waveform<double>> > resultWaveformsAllTriggerLeftSide;
   std::vector<Waveform<double>> resultWaveformOneTriggerLeftSide;
 
-
-  //Loop over the trigger one side
+  //Loop over the trigger on one side
   for (size_t i_trigger = 0; i_trigger < vectorOfTriggerSamplesFirstSide.size(); i_trigger++) {
     double sampleSize = 0;
 
@@ -310,7 +210,7 @@ std::vector< std::vector< std::vector<Waveform<double>> > > LAPPDTrigger::Trigge
     //   sampleSize += sampledWaveforms.at(i_trigger).at(i_sample).second.at(0);
     // }
 
-    for(size_t i_channel = 0; i_channel < sampledWaveforms.size()/2; i_channel++){
+    for(size_t i_channel = 0; i_channel < untriggeredWaveforms.size()/2; i_channel++){
 
       //Get values
       int triggerSample = vectorOfTriggerSamplesFirstSide.at(i_trigger).second;
@@ -325,24 +225,18 @@ std::vector< std::vector< std::vector<Waveform<double>> > > LAPPDTrigger::Trigge
       int sampleLoop = triggerSample;
 
       //while-loop over the samples as long as the added up sample times to not exceed the trigger readout time
+
       while(timeGone < triggerTime){
-        timeGone += sampledWaveforms.at(i_channel).at(sampleLoop).second.at(0)/1000;
+        timeGone += originalSampleSize/1000;
         sampleLoop++;
       }
 
       //Get the number of samples that get a current injection
       int numberOfNoiseSamples = (int) triggerSampleSize->GetRandom();
-      //Look at the current sample number
-      int currentIndex = sampledWaveforms.at(i_channel).at(sampleLoop).first;
+
       //loop over noise samples
       for(int i = 0; i <= numberOfNoiseSamples; i++){
-        int copyIndex = sampledWaveforms.at(i_channel).at(sampleLoop-i).first;
-        double copySize = sampledWaveforms.at(i_channel).at(sampleLoop-i).second.at(0);
-        std::vector<double> vec;
-        vec.push_back(copySize);
-        vec.push_back(-triggerVoltage->GetRandom());
-        std::pair<int,std::vector<double>> pairToCopy = std::pair<int,std::vector<double> >(copyIndex, vec);
-        sampledWaveforms.at(i_channel).at(sampleLoop-i) = pairToCopy;
+        untriggeredWaveforms.at(i_channel).SetSample(sampleLoop-i, -triggerVoltage->GetRandom());
       }
 
       //Implementation of the wraparound effect
@@ -353,30 +247,41 @@ std::vector< std::vector< std::vector<Waveform<double>> > > LAPPDTrigger::Trigge
       //Calculate start time
       double waveformStartTime = 0.0;
       Waveform<double> waveformVoltages;
-      for(size_t i_sample = 0 ; i_sample < sampleLoop - 255; i_sample++){
-        waveformStartTime += sampledWaveforms.at(i_channel).at(i_sample).second.at(0);
+      double lengthOfWaveform = _LAPPD_channel_lengths->at(LAPPDNumber).at(i_channel);
+      double numberOfSamplesDouble = lengthOfWaveform/originalSampleSize;
+      int numberOfSamplesInt = (int)numberOfSamplesDouble + 1;
+
+      //ToDo: Find a way to get rid of the negative numbers here
+      for(size_t i_sample = 0 ; i_sample < sampleLoop - numberOfSamplesInt; i_sample++){
+        // std::cout << "i_sample " << i_sample << std::endl;
+        waveformStartTime += originalSampleSize;
       }
+      waveformStartTime = waveformStartTime + startTracingTime;
 
       //Loop over the samples to get a waveform with 256 samples
-      for(size_t i_sample = sampleLoop - 255; i_sample <= sampleLoop; i_sample++){
+      int firstSample = (_starting_sample + sampleLoop - numberOfSamplesInt)%256;
+
+      for(size_t i_sample = sampleLoop - numberOfSamplesInt; i_sample <= sampleLoop; i_sample++){
         //Look for the 0th sample, since at that point the wraparound delay needs to be applied.
-        if(sampledWaveforms.at(i_channel).at(i_sample).first == 0){
+
+        int currentSample = (_starting_sample + i_sample)%256;
+        if(currentSample == 0){
          //Calculate the number of samples, which are overwritten due to the delay
+
           while(wraparoundTime > sumSampleTimes){
-            sumSampleTimes += sampledWaveforms.at(i_channel).at(i_sample).second.at(0);
+            sumSampleTimes += originalSampleSize;
             numberOfShiftedSamples++;
           }
+
         }
         //Create a waveform and fill the samples.
-        oneTriggeredWaveform.push_back(sampledWaveforms.at(i_channel).at(i_sample + numberOfShiftedSamples));
-        waveformVoltages.PushSample(sampledWaveforms.at(i_channel).at(i_sample + numberOfShiftedSamples).second.at(1));
+        waveformVoltages.PushSample(untriggeredWaveforms.at(i_channel).GetSample(i_sample + numberOfShiftedSamples));
       }
       //Set the start time for the waveform and push it to a vector for the one trigger currently looked at
       waveformVoltages.SetStartTime(waveformStartTime);
+      waveformVoltages = ResampleWaveforms(waveformVoltages, LAPPDNumber, i_channel, firstSample);
       resultWaveformOneTriggerLeftSide.push_back(waveformVoltages);
 
-      triggeredWaveformsLeft.push_back(oneTriggeredWaveform);
-      oneTriggeredWaveform.clear();
     }
     //Save the waveforms for all triggers for the left side
     resultWaveformsAllTriggerLeftSide.push_back(resultWaveformOneTriggerLeftSide);
@@ -387,6 +292,7 @@ std::vector< std::vector< std::vector<Waveform<double>> > > LAPPDTrigger::Trigge
   std::vector< std::vector<Waveform<double>> > resultWaveformsAllTriggerRightSide;
   std::vector<Waveform<double>> resultWaveformOneTriggerRightSide;
 
+
   //Loop over the trigger other side
   //This is basically copied code from above.
   for (size_t i_trigger = 0; i_trigger < vectorOfTriggerSamplesSecondSide.size(); i_trigger++) {
@@ -396,7 +302,7 @@ std::vector< std::vector< std::vector<Waveform<double>> > > LAPPDTrigger::Trigge
     //   sampleSize += sampledWaveforms.at(i_trigger).at(i_sample).second.at(0);
     // }
 
-    for(size_t i_channel = sampledWaveforms.size()/2; i_channel < sampledWaveforms.size(); i_channel++){
+    for(size_t i_channel = untriggeredWaveforms.size()/2; i_channel < untriggeredWaveforms.size(); i_channel++){
 
       //Get values
       int triggerSample = vectorOfTriggerSamplesSecondSide.at(i_trigger).second;
@@ -410,25 +316,18 @@ std::vector< std::vector< std::vector<Waveform<double>> > > LAPPDTrigger::Trigge
       //sample that is currently looked at
       int sampleLoop = triggerSample;
 
-      //while-loop over the samples as long as the added up sample times to not exceed the trigger readout time
+      //while-loop over the samples as long as the added up sample times do not exceed the trigger readout time
       while(timeGone < triggerTime){
-        timeGone += sampledWaveforms.at(i_channel).at(sampleLoop).second.at(0)/1000;
+        timeGone += originalSampleSize/1000;
         sampleLoop++;
       }
 
       //Get the number of samples that get a current injection
       int numberOfNoiseSamples = (int) triggerSampleSize->GetRandom();
-      //Look at the current sample number
-      int currentIndex = sampledWaveforms.at(i_channel).at(sampleLoop).first;
+
       //loop over noise samples
       for(int i = 0; i <= numberOfNoiseSamples; i++){
-        int copyIndex = sampledWaveforms.at(i_channel).at(sampleLoop-i).first;
-        double copySize = sampledWaveforms.at(i_channel).at(sampleLoop-i).second.at(0);
-        std::vector<double> vec;
-        vec.push_back(copySize);
-        vec.push_back(-triggerVoltage->GetRandom());
-        std::pair<int,std::vector<double>> pairToCopy = std::pair<int,std::vector<double> >(copyIndex, vec);
-        sampledWaveforms.at(i_channel).at(sampleLoop-i) = pairToCopy;
+        untriggeredWaveforms.at(i_channel).SetSample(sampleLoop-i, -triggerVoltage->GetRandom());
       }
 
       //Implementation of the wraparound effect
@@ -439,27 +338,42 @@ std::vector< std::vector< std::vector<Waveform<double>> > > LAPPDTrigger::Trigge
       //Calculate start time
       double waveformStartTime = 0.0;
       Waveform<double> waveformVoltages;
-      for(size_t i_sample = 0 ; i_sample < sampleLoop - 255; i_sample++){
-        waveformStartTime += sampledWaveforms.at(i_channel).at(i_sample).second.at(0);
+      double lengthOfWaveform = _LAPPD_channel_lengths->at(LAPPDNumber).at(i_channel);
+      double numberOfSamplesDouble = lengthOfWaveform/originalSampleSize;
+      int numberOfSamplesInt = (int)numberOfSamplesDouble + 1;
+
+      for(size_t i_sample = 0 ; i_sample < sampleLoop - numberOfSamplesInt; i_sample++){
+        waveformStartTime += originalSampleSize;
       }
 
-      for(size_t i_sample = sampleLoop - 255; i_sample <= sampleLoop; i_sample++){
-        if(sampledWaveforms.at(i_channel).at(i_sample).first == 0){
+      waveformStartTime = waveformStartTime + startTracingTime;
+
+      int firstSample = (_starting_sample + sampleLoop - numberOfSamplesInt)%256;
+
+      for(size_t i_sample = sampleLoop - numberOfSamplesInt; i_sample <= sampleLoop; i_sample++){
+        int currentSample = (_starting_sample + i_sample)%256;
+        if(currentSample == 0){
+         //Calculate the number of samples, which are overwritten due to the delay
           while(wraparoundTime > sumSampleTimes){
-            sumSampleTimes += sampledWaveforms.at(i_channel).at(i_sample).second.at(0);
+            sumSampleTimes += originalSampleSize;
             numberOfShiftedSamples++;
           }
         }
-        oneTriggeredWaveform.push_back(sampledWaveforms.at(i_channel).at(i_sample + numberOfShiftedSamples));
-        waveformVoltages.PushSample(sampledWaveforms.at(i_channel).at(i_sample + numberOfShiftedSamples).second.at(1));
+        //Create a waveform and fill the samples.
+        waveformVoltages.PushSample(untriggeredWaveforms.at(i_channel).GetSample(i_sample + numberOfShiftedSamples));
       }//end of sample loop
-      triggeredWaveformsRight.push_back(oneTriggeredWaveform);
-      oneTriggeredWaveform.clear();
+      //Set the start time for the waveform and push it to a vector for the one trigger currently looked at
+      waveformVoltages.SetStartTime(waveformStartTime);
+      waveformVoltages = ResampleWaveforms(waveformVoltages, LAPPDNumber, i_channel, firstSample);
       resultWaveformOneTriggerRightSide.push_back(waveformVoltages);
     }//end of channel loop
+    //Save the waveforms for all triggers for the left side
+
     resultWaveformsAllTriggerRightSide.push_back(resultWaveformOneTriggerRightSide);
     resultWaveformOneTriggerRightSide.clear();
   }//end of trigger loop
+
+
 
   // std::cout << "Size of Waveforms left " << triggeredWaveformsLeft.size() << std::endl;
   // std::cout << "Size of Waveforms right " << triggeredWaveformsRight.size() << std::endl;
@@ -467,16 +381,120 @@ std::vector< std::vector< std::vector<Waveform<double>> > > LAPPDTrigger::Trigge
   // std::cout << "Size of Waveforms left trigger " << resultWaveformsAllTriggerLeftSide.size() << std::endl;
   // std::cout << "Size of Waveforms right trigger " << resultWaveformsAllTriggerRightSide.size() << std::endl;
 
-std::vector<std::vector<std::vector<std::pair<int, vector<double> > > > > triggeredWaveforms;
-triggeredWaveforms.push_back(triggeredWaveformsLeft);
-triggeredWaveforms.push_back(triggeredWaveformsRight);
-
 std::vector< std::vector< std::vector<Waveform<double>> > > resultWaveformsAllTriggerBothSides;
 resultWaveformsAllTriggerBothSides.push_back(resultWaveformsAllTriggerLeftSide);
 resultWaveformsAllTriggerBothSides.push_back(resultWaveformsAllTriggerRightSide);
-std::cout << "End of triggering method" << std::endl;
 return resultWaveformsAllTriggerBothSides;
 }
+
+
+Waveform<double> LAPPDTrigger::ResampleWaveforms(Waveform<double> untriggeredWaveforms, int LAPPDNumber, int channelNumber, int firstSample){
+
+    Waveform<double> resampledWaveform;
+    resampledWaveform.SetStartTime(untriggeredWaveforms.GetStartTime());
+
+    //Vector of channels of vector of samples of pairs corresponding to the sample number and a vector of two doubles corresponding to the sample size and the sample voltage
+    std::vector<std::vector<std::pair<int, vector<double> > > > sampledWaveforms;
+
+      //Time of the start of the sample currently looked at in the sampled waveforms
+      double startSampleTime = 0.0;
+      //Voltage to fill in the sample currently looked at
+      double voltageToFill = 0;
+
+      //Number of the sample in the sampled waveforms
+      int sampleCounter = firstSample;
+
+      //Get the random but constant sample size, which was created in the constructor for this particular LAPPD at that particular channel for the starting sample
+      double sampleSize = _LAPPD_sample_times->at(LAPPDNumber).at(channelNumber).at(firstSample%256);
+
+      //Time of the end of the sample currently looked at in the samples waveforms
+      double endSampleTime = startSampleTime + sampleSize;
+
+      //Vector of all samples of one waveform, with <sample size, <sample size, sample voltage> >
+      std::vector<std::pair<int,vector<double> > > sampledVoltages;
+
+      //Loop over samples
+      for(size_t i_Sample = 0; i_Sample < untriggeredWaveforms.GetSamples()->size(); i_Sample++){
+        // std::cout << "ChannelNumber " << i_Channel << "SampleNumber " << i_Sample << " Voltage " << untriggeredWaveforms.at(i_Channel).GetSample(i_Sample) << std::endl;
+
+        //Original sample size of the untriggered waveforms used for the GetTrace()-Method of the LAPPDresponse class
+        //ToDo: Implement this as a parameter for this function
+        double originalSize = 50;
+
+        //Get the voltage of the untriggered waveform at the sample i_Sample
+        double voltage = untriggeredWaveforms.GetSample(i_Sample);
+
+        //Calculate the start time of the sample of the untriggered waveform
+        double startTemplateTime = i_Sample * originalSize;
+
+        //Calculate the end time of the sample of the untriggered waveform
+        double endTemplateTime = (i_Sample + 1) * originalSize;
+
+        //If the end time of the sample of the sampled waveform is bigger than the end time of the sample of the untriggered waveforms,
+        //then the percentage of voltage from the untriggered waveforms can be filled in the sample of the sampled waveforms, since
+        //the constant sized sample is at an end
+        // |....|....|....|....| <-constant samples
+        // |vvvv|
+        // |.......|........|......| <- samples with different size
+        //
+        if(endSampleTime > endTemplateTime){
+          //Calculate what percentage the constant size sample makes up in the sample with different size and add this to the voltage of the non-constant sample
+          voltageToFill += ((endTemplateTime - startSampleTime)/sampleSize)*voltage;
+
+          //When in last iteration the values need to be pushed into the vector
+          if(i_Sample == untriggeredWaveforms.GetSamples()->size()-1){
+            //vector of sample size and sample voltage
+            std::vector<double> sizeVoltage;
+            //Fill the size of the sample in the vector
+            sizeVoltage.push_back(sampleSize);
+            //Fill the calculated voltage in the vector
+            sizeVoltage.push_back(voltageToFill);
+            //Make a pair of the sample number an the vector above and push it in the sample vector
+            sampledVoltages.push_back( std::pair<int,std::vector<double> >(sampleCounter%256, sizeVoltage));
+            resampledWaveform.PushSample(voltageToFill);
+          }
+        }
+        //Now the end time of the constant sample is bigger than the non-constant one, so that the calculation of
+        //the voltage of the non-constant sample is finished
+        // |....|....|....|....| <-constant samples
+        //      |vv|
+        // |.......|........|......| <- samples with different size
+        else{
+          //Caclulate what percentage the constant size sample makes up in the sample with different size and add this to the voltage of the non-constant sample
+          voltageToFill += ((endSampleTime - startTemplateTime)/sampleSize)*voltage;
+          //vector of sample size and sample voltage
+          std::vector<double> sizeVoltage;
+          //Fill the size of the sample in the vector
+          sizeVoltage.push_back(sampleSize);
+          //Fill the calculated voltage in the vector
+          sizeVoltage.push_back(voltageToFill);
+          //Make a pair of the sample number an the vector above and push it in the sample vector
+          sampledVoltages.push_back( std::pair<int,std::vector<double> >(sampleCounter%256, sizeVoltage));
+          resampledWaveform.PushSample(voltageToFill);
+          //Reset values
+          sizeVoltage.clear();
+          voltageToFill = 0;
+          //Get the current sample size
+          sampleSize = _LAPPD_sample_times->at(LAPPDNumber).at(channelNumber).at(sampleCounter%256);
+          //Calculate the new sample start time
+          startSampleTime += sampleSize;
+          //Go to the next sample in the non-constant sample waveform
+          sampleCounter++;
+          //Get the sample size of the next sample
+          sampleSize = _LAPPD_sample_times->at(LAPPDNumber).at(channelNumber).at(sampleCounter%256);
+          //Calculate the new sample end time
+          endSampleTime = startSampleTime + sampleSize;
+        }
+      }//end of sample loop
+
+      sampledWaveforms.push_back(sampledVoltages);
+      sampledVoltages.clear();
+
+      return resampledWaveform;
+
+
+}
+
 
 
 
