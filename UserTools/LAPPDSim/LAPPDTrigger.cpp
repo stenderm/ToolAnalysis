@@ -23,6 +23,7 @@
 */
 
 #include "LAPPDTrigger.h"
+#include "LAPPDConstants.h"
 
 /**
 * Constructor LAPPDTrigger: Initialises the trigger Class. Is used to create individual sample times for each sample on each channel and save them, so that ever channel has 256 samples with individual sizes,
