@@ -298,9 +298,16 @@ bool LAPPDSim::Execute()
 			VwavsReference.clear();
 
 			double startTracingTime = -20000.0;// -100000.0;
+
+			//Start with the two calibration channels of the left side
+			//Start with an int showing the number of channels, to which the white rabbit signal is split
+			//250 MHz, 1.2 Vpp
+
+
 			//loop over the channels on each LAPPD
 			//Positive numbers describe one side, negative numbers the other side in a way, that left number = -right numbers
-			for (int i = -30; i < 31; i++)
+			//We have only 28 channels with two channels per side for calibration and synchronising
+			for (int i = -28; i < 29; i++)
 			{
 				if (i == 0)
 				{
@@ -317,6 +324,7 @@ bool LAPPDSim::Execute()
 				Vwavs.push_back(awav);
 			}
 
+			//end with the two calibration channels of the right side
 
 			// std::vector<std::vector<std::vector<std::pair<int, vector<double> > > > > triggeredWaveformsNew = triggerObject->TriggerWaveforms(Vwavs, actualTubeNo);
 			//entry 0 is the one side of the LAPPD, entry 1 is the other side.

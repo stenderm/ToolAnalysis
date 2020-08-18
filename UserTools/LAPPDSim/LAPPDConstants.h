@@ -21,6 +21,12 @@ double rightSideLAPPDDelay[DelayEntries] = {1.23481, 1.23426, 1.23223, 1.23445, 
                                             1.54284, 1.54834, 0.586834, 0.578138, 0.585629, 0.587519, 0.586053, 0.585981,
                                             0.352459, 0.354052, 0.360418, 0.359968, 0.202251, 0.239128};
 
+//frequency of synchronisation signal in MHz
+double wrFrequency = 250.0;
+
+//voltage peak to peak for synchronisation signal in volt
+double Vpp = 1.2;
+
 //In and out delay for the channel comparators
 double comparatorDelay = 2.4;
 
