@@ -1,6 +1,10 @@
 #ifndef SRC_LAPPDConstants_H_
 #define SRC_LAPPDConstants_H_
 
+
+//Namespace for all the constants we need for the LAPPD simulation
+
+
 namespace LAPPDConstants {
 
 // All Delays are in ns, if not stated otherwise.
@@ -26,6 +30,9 @@ double wrFrequency = 250.0;
 
 //voltage peak to peak for synchronisation signal in volt
 double Vpp = 1.2;
+
+//number of channels fed from one wr
+int wrChannelNumber = 6;
 
 //In and out delay for the channel comparators
 double comparatorDelay = 2.4;

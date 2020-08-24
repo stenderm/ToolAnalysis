@@ -66,6 +66,8 @@ void LAPPDresponse::Initialise(TFile* tf){
 void LAPPDresponse::AddSinglePhotonTrace(double trans, double para, double time)
 {
   // Draw a random value for the peak signal peak
+  //ATTENTION: The division with 10 is here, since the example LAPPD has a much higher gain than the ANNIE LAPPDs
+  //ToDo: Change this number in case of a new example pulse
   double peak = (_PHD->GetRandom())/10.;
 
   // find nearest strip
@@ -253,12 +255,12 @@ int LAPPDresponse::FindStripNumber(double trans){
   //This is now adjusted to support only 28 stripes, since the other two are for calibration
   int stripnum=-1;
   if(newtrans<5.765) stripnum = 1;
-  if(newtrans>197.435) stripnum = 28;
+  if(newtrans>197.435) stripnum = 30;
 
   double stripdouble;
   if(stripnum==-1){
     // divide the 26 remaining strips into the remaining area
-    double stripdouble = 26.0*((newtrans-5.765)/(203.2 - 11.53));
+    double stripdouble = 28.0*((newtrans-5.765)/(203.2 - 11.53));
     stripnum = 2 + floor(stripdouble);
   }
 
@@ -271,11 +273,11 @@ double LAPPDresponse::StripCoordinate(int stripnumber){
   double coor = -55555.;
   // the first and last strips have a different width
   if(stripnumber==1) coor = (2.31-101.6);
-  if(stripnumber==28) coor = (101.6-2.31);
+  if(stripnumber==30) coor = (101.6-2.31);
 
-  if( stripnumber>1 && stripnumber<28 ){
+  if( stripnumber>1 && stripnumber<30 ){
     // remaining 26 strips have the same spacing
-    coor= (5.765-101.6+3.455) + (stripnumber-2)*7.37;
+    coor= (5.765-101.6+3.455) + (stripnumber-2)*6.91;
   }
 
   return coor;

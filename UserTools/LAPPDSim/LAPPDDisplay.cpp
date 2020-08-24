@@ -472,10 +472,12 @@ void LAPPDDisplay::RecoDrawingTriggered(int eventCounter, unsigned long tubeNumb
     //saved in a way, that 0 equals -30 and 59 equals 30. So for the right side
     //one needs to start with the last entry.
 		std::vector<double>* samplesleft = waveformVector[i].GetSamples();
+
 		// std::cout << "Left start times " << "strip " << i << " " << waveformVector[i].GetStartTime() << std::endl;
 		std::vector<double>* samplesright = waveformVector[59 - i].GetSamples();
 		double leftStartTime = waveformVector[i].GetStartTime()/1000;
 		double rightStartTime = waveformVector[59 - i].GetStartTime()/1000;
+
     //Creation of histogram names for every strip
     std::string stripNumber = boost::lexical_cast < std::string > (i);
     std::string nameWaveformLeft = "Triggeredevent" + eventnumber + "lappd" + lappdnumber + "strip" + stripNumber + "left";
@@ -490,8 +492,10 @@ void LAPPDDisplay::RecoDrawingTriggered(int eventCounter, unsigned long tubeNumb
     TH1D* waveformLeft = new TH1D(waveformLeftChar, waveformLeftChar, 257, leftStartTime, leftMax);
     TH1D* waveformRight = new TH1D(waveformRightChar, waveformRightChar, 257, rightStartTime, rightMax);
 
+		int numberSamples = 0;
+		samplesleft->size() >= samplesright->size() ? numberSamples = samplesright->size() : numberSamples = samplesleft->size();
     //loop over the samples
-		for (int j = 0; j < samplesleft->size(); j++)
+		for (int j = 0; j < numberSamples; j++)
 		{
       //The samples range from 0 to 256, which equals 0 to 25.6 ns.
       //Therefore one needs the sample number divided with 10 to get ns.

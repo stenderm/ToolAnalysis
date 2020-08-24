@@ -297,35 +297,56 @@ bool LAPPDSim::Execute()
 			Vwavs.clear();
 			VwavsReference.clear();
 
+			//Start and end time is in ps
 			double startTracingTime = -20000.0;// -100000.0;
+			//Sample size in ps
+			int sampleSize = 50;
+			int numberOfPulledSamples = 30000;
+			double endTimeForSyncFunc = startTracingTime + sampleSize*numberOfPulledSamples;
+
+		  triggerObject->CreateSyncFunc(0.0, 25600, 256, 100, true);
+			triggerObject->CreateSyncFunc(startTracingTime, endTimeForSyncFunc, numberOfPulledSamples, sampleSize, false);
 
 			//Start with the two calibration channels of the left side
 			//Start with an int showing the number of channels, to which the white rabbit signal is split
 			//250 MHz, 1.2 Vpp
-
-
+			VwavsReference.push_back(triggerObject->GetSyncFuncReference());
+			Vwavs.push_back(triggerObject->GetSyncFunc());
 			//loop over the channels on each LAPPD
 			//Positive numbers describe one side, negative numbers the other side in a way, that left number = -right numbers
 			//We have only 28 channels with two channels per side for calibration and synchronising
-			for (int i = -28; i < 29; i++)
+			for (int i = -29; i < 30; i++)
 			{
 				if (i == 0)
 				{
 					continue;
 				}
-
+				if(i == -1){
+					VwavsReference.push_back(triggerObject->GetSyncFuncReference());
+					Vwavs.push_back(triggerObject->GetSyncFunc());
+					continue;
+				}
+				if(i == 1){
+					VwavsReference.push_back(triggerObject->GetSyncFuncReference());
+					Vwavs.push_back(triggerObject->GetSyncFunc());
+					continue;
+				}
 				//Retrieve the traces, which were stored with the AddSinglePhotonTrace method
 				//I get the following GetTrace(i, time of the start of the sample (calculated from the previous ones), size of the sample from the Gaussian distribution, 1, 1.0)
 				Waveform<double> awavReference = response.GetTrace(i, 0.0, 100, 256, 1.0);
 
-				Waveform<double> awav = response.GetTrace(i, startTracingTime, 50, 30000, 1.0); //-1000000
+				Waveform<double> awav = response.GetTrace(i, startTracingTime, sampleSize, numberOfPulledSamples, 1.0); //-1000000
 				//std::cout << "Start time " << awav.GetStartTime() << std::endl;
 				VwavsReference.push_back(awavReference);
 				Vwavs.push_back(awav);
 			}
 
 			//end with the two calibration channels of the right side
+			VwavsReference.push_back(triggerObject->GetSyncFuncReference());
 
+			Vwavs.push_back(triggerObject->GetSyncFunc());
+
+			std::cout << "Start triggering" << std::endl;
 			// std::vector<std::vector<std::vector<std::pair<int, vector<double> > > > > triggeredWaveformsNew = triggerObject->TriggerWaveforms(Vwavs, actualTubeNo);
 			//entry 0 is the one side of the LAPPD, entry 1 is the other side.
 			//Vector(sides)<vector(trigger number)<vector(channels)<Waveform>>>
