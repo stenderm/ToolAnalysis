@@ -489,8 +489,8 @@ void LAPPDDisplay::RecoDrawingTriggered(int eventCounter, unsigned long tubeNumb
 		double rightMax = rightStartTime + 280 * (97.15/1000);
 
     //Initialisation of the histograms
-    TH1D* waveformLeft = new TH1D(waveformLeftChar, waveformLeftChar, 257, leftStartTime, leftMax);
-    TH1D* waveformRight = new TH1D(waveformRightChar, waveformRightChar, 257, rightStartTime, rightMax);
+    TH1D* waveformLeft = new TH1D(waveformLeftChar, waveformLeftChar, 500, leftStartTime, leftMax);
+    TH1D* waveformRight = new TH1D(waveformRightChar, waveformRightChar, 500, rightStartTime, rightMax);
 
 		int numberSamples = 0;
 		samplesleft->size() >= samplesright->size() ? numberSamples = samplesright->size() : numberSamples = samplesleft->size();
