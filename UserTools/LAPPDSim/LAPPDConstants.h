@@ -25,6 +25,17 @@ double rightSideLAPPDDelay[DelayEntries] = {1.23481, 1.23426, 1.23223, 1.23445, 
                                             1.54284, 1.54834, 0.586834, 0.578138, 0.585629, 0.587519, 0.586053, 0.585981,
                                             0.352459, 0.354052, 0.360418, 0.359968, 0.202251, 0.239128};
 
+//IMPORTANT NOTE: The first two channels are calibration or synchronisation channels!
+double channelToSumDelay[DelayEntries] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+                                          0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+                                          0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+                                          0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+
+
+
+
+//--------------------------------------------------------------------------------------------------------------------------------
+//synchronisation function parameters
 //frequency of synchronisation signal in MHz
 double wrFrequency = 250.0;
 
@@ -34,14 +45,36 @@ double Vpp = 1.2;
 //number of channels fed from one wr
 int wrChannelNumber = 6;
 
+//--------------------------------------------------------------------------------------------------------------------------------
+//Comparator parameters
 //In and out delay for the channel comparators
 double comparatorDelay = 2.4;
+
+//Threshold of the channel comparators in mV
+double comparatorThreshold = 20.0;
+
+//Signal length of the output of the channel comparators
+double comparatorSigLength = 1.0;
+
+//Amplitude of the output signal of the channel comparator in mV
+double comparatorSigAmplitude = 200.0;
 
 //In and out delay for the integral comparator
 double sumComparatorDelay = 0.5;
 
+//Threshold for the integral comparator in mV ToDo:Adjust this number!
+double sumComparatorThreshold = 200.0;
+
+//Integrator interval of the multiplicity comparator
+double sumCompartorInterval = 100.0;
+
+//--------------------------------------------------------------------------------------------------------------------------------
+
+//Delay due to the signal from the anode traveling to the trigger board and then to the pickup board
+double anodeToPickUpDelay = 0.0751;
+
 //Delay due to the differential stripline from the sum comparator to the PSEC electronic
-//Assumed that the signal speed is 4.5 ns/main
+//Assumed that the signal speed is 4.5 ns/meter
 double triggerToPSECDelay = 0.9;
 
 }

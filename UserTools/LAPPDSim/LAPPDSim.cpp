@@ -334,8 +334,9 @@ bool LAPPDSim::Execute()
 				//Retrieve the traces, which were stored with the AddSinglePhotonTrace method
 				//I get the following GetTrace(i, time of the start of the sample (calculated from the previous ones), size of the sample from the Gaussian distribution, 1, 1.0)
 				Waveform<double> awavReference = response.GetTrace(i, 0.0, 100, 256, 1.0);
-
+				awavReference.SetStartTime(0.0);
 				Waveform<double> awav = response.GetTrace(i, startTracingTime, sampleSize, numberOfPulledSamples, 1.0); //-1000000
+				awav.SetStartTime(startTracingTime);
 				//std::cout << "Start time " << awav.GetStartTime() << std::endl;
 				VwavsReference.push_back(awavReference);
 				Vwavs.push_back(awav);
