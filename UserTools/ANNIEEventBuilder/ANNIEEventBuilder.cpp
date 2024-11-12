@@ -1150,7 +1150,8 @@ void ANNIEEventBuilder::ProcessNewCTCData(){
       if (CTCWord == 32) myTimeStream.CTCTimestampsPPS.push_back(CTCTimestamp);
       if (CTCWord == 5) {
         myTimeStream.CTCTimestampsBeam.push_back(CTCTimestamp);
-        std::cout <<"CTCTimestampBeam: "<<CTCTimestamp<<std::endl;
+        // I don't know whether this needs to be here. It floods the terminal in my case though
+        if (verbosity > 4){std::cout <<"CTCTimestampBeam: "<<CTCTimestamp<<std::endl;}
       }
     }
     aux_trigword_delete.push_back(CTCTimestamp);

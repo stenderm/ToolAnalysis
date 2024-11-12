@@ -1,0 +1,21 @@
+verbosity 5
+
+BuildType Tank
+OutputFile DQMonitoringPMT.root
+
+MinNumWavesInSet 134 // 1=Just throw any waveforms into ANNIE events if you got em
+
+ExecutesPerBuild 10
+
+
+#old unused variables
+
+ProcessedFilesBasename ProcessedRawData
+OrphanFileBase OrphanStore
+SavePath ./
+
+OrphanOldTankTimestamps 1
+OldTimestampThreshold 150
+
+SaveRawData 0
+StoreBeamStatus 1

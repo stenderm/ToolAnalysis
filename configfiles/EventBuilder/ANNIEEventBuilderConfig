@@ -1,6 +1,6 @@
-verbosity 0
+verbosity 5
 
-BuildType TankAndMRDAndCTC
+BuildType TankAndMRD
 ProcessedFilesBasename ProcessedRawData
 NumEventsPerPairing 200
 SavePath ./
@@ -13,7 +13,7 @@ OldTimestampThreshold 1000
 OrphanFileBase OrphanStore
 MaxStreamMatchingTimeSeparation 60   # seconds. If one stream is ahead of the others, pause reading
 
-SaveRawData 0
+SaveRawData 1
 StoreBeamStatus 0
 
 BuildStage1Data 0 

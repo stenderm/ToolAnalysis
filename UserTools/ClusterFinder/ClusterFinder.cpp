@@ -101,6 +101,8 @@ bool ClusterFinder::Initialise(std::string configfile, DataModel &data){
     else if (dettype.find("D784KFLB") != std::string::npos) radius_PMT[detkey] = map_type_radius["D784KFLB"];
     else if (dettype.find("EMI9954KB") != std::string::npos) radius_PMT[detkey] = map_type_radius["EMI9954KB"];
 
+    //FIXME: The following line has undefined behaviour, since the diffuser variables were never correctly initalised,
+    // the expected_time map seems not to be used, so it should be no problem.
     double expectedT = (sqrt(pow(x_PMT.at(detkey)-diffuser_x,2)+pow(y_PMT.at(detkey)-diffuser_y,2)+pow(z_PMT.at(detkey)-diffuser_z,2))-radius_PMT[detkey])/c_vacuum*n_water*1E9;
     expected_time.insert(std::pair<unsigned long,double>(detkey,expectedT));
   } 

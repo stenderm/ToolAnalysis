@@ -1,0 +1,10 @@
+myLoadGeometry LoadGeometry ./configfiles/DataDecoderTank/LoadGeometryConfig
+LoadRawData LoadRawData ./configfiles/DQMonitoring/LoadRawDataConfig
+PMTDataDecoder PMTDataDecoder ./configfiles/DQMonitoring/PMTDataDecoderConfig
+MRDDataDecoder MRDDataDecoder ./configfiles/DataDecoder/MRDDataDecoderConfig
+#TriggerDataDecoder TriggerDataDecoder ./configfiles/DataDecoder/TriggerDataDecoderConfig
+PhaseIIADCCalibrator PhaseIIADCCalibrator ./configfiles/DataDecoder/PhaseIIADCCalibratorConfig
+PhaseIIADCHitFinder PhaseIIADCHitFinder ./configfiles/DataDecoder/PhaseIIADCHitFinderConfig
+#SaveConfigInfo SaveConfigInfo ./configfiles/EventBuilder/SaveConfigInfoConfig
+ANNIEEventBuilder ANNIEEventBuilder ./configfiles/EventBuilder/ANNIEEventBuilderConfig
+#DQMonitoringPMT DQMonitoringPMT ./configfiles/DQMonitoring/DQMonitoringPMTConfig

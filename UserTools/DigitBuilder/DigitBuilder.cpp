@@ -344,7 +344,7 @@ bool DigitBuilder::BuildMCLAPPDRecoDigit() {
         std::cout << "Loading in digits for LAPPDID " << LAPPDId << std::endl;
       }
 
-			if(det->GetDetectorElement()=="LAPPD"){ // redundant, MCLAPPDHits are LAPPD hitss
+			if(det->GetDetectorElement()=="LAPPD"){ // redundant, MCLAPPDHits are LAPPD hits
 				std::vector<MCLAPPDHit>& hits = apair.second;
 				for(MCLAPPDHit& ahit : hits){
 					//if(v_message<verbosity) ahit.Print(); // << VERY verbose
