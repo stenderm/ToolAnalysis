@@ -2,7 +2,7 @@ ToolDAQPath=${PWD}/ToolDAQ
 
 GIT_VERSION := "$(shell git describe --dirty --always)"
 
-CPPFLAGS= -DVERSION=\"$(GIT_VERSION)\" -Wno-reorder -Wno-sign-compare -Wno-unused-variable -Wno-unused-but-set-variable -Werror=return-type -Wl,--no-as-needed
+CPPFLAGS= -DVERSION=\"$(GIT_VERSION)\" -Wno-reorder -Wno-sign-compare -Wno-unused-variable -Wno-unused-but-set-variable -Werror=return-type -Wl,--no-as-needed -pedantic
 
 CC=g++ -std=c++1y -g -fPIC -shared $(CPPFLAGS)
 CCC= g++ -std=c++1y -g -fPIC  $(CPPFLAGS)

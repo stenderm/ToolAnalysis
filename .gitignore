@@ -34,4 +34,19 @@ DataModel/DataModel_Linkdef.hh
 # These are imported as part of ToolPack
 UserTools/ImportedTools
 UserTools/InactiveTools
-
+output
+.cproject
+.project
+.settings
+AutoDict*
+*.pdf
+*.txt
+ANNIEScripts
+DataSamples
+DQMonitoringPMT
+EventDisplay
+OrphanStore_TankAndMRDAndCTC_R4788S0p0
+OrphanStore_TankAndMRD_R4782S0p0
+*.dat
+ThreeDimensionPlot.C
+ToolChainConfig

@@ -1,0 +1,8 @@
+# TopoRecoConverter configuration file
+
+verbosity 1
+rootFile RecoInput.root
+datFile PositionsAndDirections.dat
+runMode Hybrid
+writePosDirFile 1
+spatialResolutionLAPPD 1.0
