@@ -53,11 +53,19 @@ void LoadSingleRun::loadInformationTrigger(
 void LoadSingleRun::loadInformationMRD(
         std::shared_ptr<TFile> t_inputFile, std::string t_MRDTreeName, int t_verbosity,
         std::unique_ptr<NTupleInformation> &t_ntupleInformationOneRun) {
-    TTree *mrdTree { openTree(t_inputFile, t_MRDTreeName, t_verbosity) };
-    if (!mrdTree) {
-        return;
-    }
-
+//    TTree *mrdTree { openTree(t_inputFile, t_MRDTreeName, t_verbosity) };
+//    if (!mrdTree) {
+//        return;
+//    }
+    ROOT::RDataFrame mrdDataFrame = ROOT::RDataFrame(t_MRDTreeName, t_inputFile.get());
+    ROOT::RDF::RResultPtr<std::vector<int> > eventNumbers { mrdDataFrame.Take<int>("eventNumber") };
+    ROOT::RDF::RResultPtr<std::vector<int> > clusterHits { mrdDataFrame.Take<double>("clusterHits") };
+    ROOT::RDF::RResultPtr<std::vector<double> > clusterTimes { mrdDataFrame.Take<double>("clusterTime") };
+    ROOT::RDF::RResultPtr<std::vector<double> > clusterTimesSigma { mrdDataFrame.Take<double>("clusterTimeSigma") };
+    ROOT::RDF::RResultPtr<std::vector<std::vector<double> > > hitTimes { mrdDataFrame.Take<double>("MRDhitT") };
+    ROOT::RDF::RResultPtr<std::vector<std::vector<int> > > detectorIDs { mrdDataFrame.Take<double>("MRDhitDetID") };
+    ROOT::RDF::RResultPtr<std::vector<int> > numberOfClusterTracks { mrdDataFrame.Take<double>("numClusterTracks") };
+    ROOT::RDF::RResultPtr<std::vector<std::vector<double> > > trackLengths { mrdDataFrame.Take<double>("MRDTrackLength") };
 }
 
 void LoadSingleRun::loadInformationTank(
