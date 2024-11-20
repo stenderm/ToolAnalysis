@@ -1,0 +1,39 @@
+# Config File for ReconstructionBenchmark
+# =======================================input=======================================
+# The input file should be a list file containing all files to load. The paths should be absolute.
+# Command for finding and adding files to a file: find ~+ -type f -name "*.root" > /nfs/neutrino/data4/stenderm/PostDoc/ANNIETTR/RecoResults/files.list 
+filename DataSamples/ntuples/list.txt
+# Define the prefix that is written directly in front of the run number in the file names
+# Make sure that the sequence is unique to the file path and in front of the run number
+prefix Run_R
+# Define the suffix that is written directly after the run number
+suffix _
+# Define the run modes, in which the ntuples were produced. 
+# Possible modes: "Beam", "LED", "Laser", "AmBe", "Cosmic", "Any"
+# With "Any" all files will be read and categorized per run mode and then drawn in different colors
+runMode Any
+# Name of the tree name for the trigger data
+triggerTreeName phaseIITriggerTree
+# Name of the tree name for the tank data
+tankTreeName phaseIITankClusterTree
+# Name of the tree name for the MRD data
+mrdTreeName phaseIIMRDClusterTree
+# Name of the tree name for the LAPPD data
+lappdTreeName phaseIILAPPDTree
+# =======================================print=======================================
+# Verbosity level of the program; 0: completely silent, 1: prints config variables and errors/unexpected behaviour, 
+# 2: prints level of information usable for debugging e.g. name of loaded files
+verbosity 2
+# =======================================calculation=======================================
+# Define the number of runs that should be summarised into one point in the graphs
+# if you want to see a long time period in a clear manner, default is 1, has to be 1 or greater
+numberOfRunsPerPoint 1
+# =======================================output=======================================
+# Save each histogram as one picture (.pdf) true or false
+saveHistogramsAsPictures 1
+# Directory to which the pictures are saved
+pictureDirectory plots/
+# Save the histograms in a ROOT file true or false
+saveHistogramsInROOTFile 1
+# File name for saving the histograms
+outputROOTFileName plots/output.root
