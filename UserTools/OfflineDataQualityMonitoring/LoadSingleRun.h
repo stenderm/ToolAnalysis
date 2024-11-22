@@ -22,7 +22,7 @@ public:
     LoadSingleRun();
     virtual ~LoadSingleRun();
     void extractNtupleInformation(int t_runNumber, const std::vector<std::string> &t_fileNames,
-                                  const std::string& t_tankTreeName, int t_verbosity,
+                                  const std::string& t_tankTreeName, const std::string& t_MRDTreeName, int t_verbosity,
                                   std::unique_ptr<NTupleInformation>& t_ntupleInformationOneRun);
 private:
     // checks if trigger tree exists and loads the trigger ntuple information into a NTupleInformation object

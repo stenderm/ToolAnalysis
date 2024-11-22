@@ -6,8 +6,10 @@
  */
 
 #include "CalculateMetrics.h"
+#include "TankInformation.h"
 #include <iostream>
 #include "TMath.h"
+#include "MRDInformation.h"
 
 CalculateMetrics::CalculateMetrics() {
     // do nothing
@@ -21,7 +23,8 @@ void CalculateMetrics::calculateTankCharge(
         const std::unique_ptr<NTupleInformation> &t_ntupleInformationOneRun,
         std::unique_ptr<RunMetrics> &t_runMetrics) {
 
-    std::map<int, TankInformation> tankInformationOneRun { t_ntupleInformationOneRun->getTankInformation() };
+    std::map<int, TankInformation> tankInformationOneRun {
+            t_ntupleInformationOneRun->getTankInformation() };
 
     int numberToReserve = t_ntupleInformationOneRun->getGlobalClusterNumber();
 
@@ -40,7 +43,6 @@ void CalculateMetrics::calculateTankCharge(
 
     std::vector<double> timePerClusters { };
     std::vector<double> meanClusterTime { };
-
 
     numberOfClusterPerEvent.reserve(numberToReserve);
     chargePerCluster.reserve(numberToReserve);
@@ -64,16 +66,16 @@ void CalculateMetrics::calculateTankCharge(
         double chargerPerEventPE { 0.0 };
         double timePerEvent { 0.0 };
 
-
-        for(int iCluster = 0; iCluster < tankInformationOneEvent.numberOfClusters; iCluster++){
+        for (int iCluster = 0; iCluster < tankInformationOneEvent.numberOfClusters; iCluster++) {
             chargePerCluster.push_back(tankInformationOneEvent.clusterCharge.at(iCluster));
             chargePerClusterPE.push_back(tankInformationOneEvent.clusterChargePE.at(iCluster));
             maxPEPerClusters.push_back(tankInformationOneEvent.clusterChargeMaxPE.at(iCluster));
-            if(tankInformationOneEvent.clusterChargeBalance.at(iCluster) > 2.0){
+            if (tankInformationOneEvent.clusterChargeBalance.at(iCluster) > 2.0) {
                 numberOfClustersWithChargeBalanceOverOne++;
             }
-            if(!std::isinf(tankInformationOneEvent.clusterChargeBalance.at(iCluster))){
-                chargeBalancePerCluster.push_back(tankInformationOneEvent.clusterChargeBalance.at(iCluster));
+            if (!std::isinf(tankInformationOneEvent.clusterChargeBalance.at(iCluster))) {
+                chargeBalancePerCluster.push_back(
+                        tankInformationOneEvent.clusterChargeBalance.at(iCluster));
             }
             timePerClusters.push_back(tankInformationOneEvent.clusterTime.at(iCluster));
             chargePerEvent += tankInformationOneEvent.clusterCharge.at(iCluster);
@@ -82,10 +84,12 @@ void CalculateMetrics::calculateTankCharge(
 
         }
 
-        if(tankInformationOneEvent.numberOfClusters){
-            meanChargePerCluster.push_back(chargePerEvent/tankInformationOneEvent.numberOfClusters);
-            meanChargePerClusterPE.push_back(chargerPerEventPE/tankInformationOneEvent.numberOfClusters);
-            meanClusterTime.push_back(timePerEvent/tankInformationOneEvent.numberOfClusters);
+        if (tankInformationOneEvent.numberOfClusters) {
+            meanChargePerCluster.push_back(
+                    chargePerEvent / tankInformationOneEvent.numberOfClusters);
+            meanChargePerClusterPE.push_back(
+                    chargerPerEventPE / tankInformationOneEvent.numberOfClusters);
+            meanClusterTime.push_back(timePerEvent / tankInformationOneEvent.numberOfClusters);
         }
         chargePerEventInClusters.push_back(chargePerEvent);
         chargePerEventInClustersPE.push_back(chargerPerEventPE);
@@ -111,21 +115,74 @@ void CalculateMetrics::calculateTankCharge(
             TMath::Mean(meanChargePerClusterPE.begin(), meanChargePerClusterPE.end()),
             TMath::StdDev(meanChargePerClusterPE.begin(), meanChargePerClusterPE.end()));
 
-    t_runMetrics->setTankChargeMaxPE(
-            TMath::Mean(maxPEPerClusters.begin(), maxPEPerClusters.end()),
+    t_runMetrics->setTankChargeMaxPE(TMath::Mean(maxPEPerClusters.begin(), maxPEPerClusters.end()),
             TMath::StdDev(maxPEPerClusters.begin(), maxPEPerClusters.end()));
 
     t_runMetrics->setTankChargeBalance(
             TMath::Mean(chargeBalancePerCluster.begin(), chargeBalancePerCluster.end()),
             TMath::StdDev(chargeBalancePerCluster.begin(), chargeBalancePerCluster.end()));
 
-    t_runMetrics->setTankTimeValues(
-            TMath::Mean(timePerClusters.begin(), timePerClusters.end()),
+    t_runMetrics->setTankTimeValues(TMath::Mean(timePerClusters.begin(), timePerClusters.end()),
             TMath::StdDev(timePerClusters.begin(), timePerClusters.end()),
             TMath::Mean(meanClusterTime.begin(), meanClusterTime.end()),
             TMath::StdDev(meanClusterTime.begin(), meanClusterTime.end()));
 
     t_runMetrics->setNumberOfClusterChargeBalanceAnomaly(numberOfClustersWithChargeBalanceOverOne);
+}
 
+void CalculateMetrics::calculateMRDMetrics(
+        const std::unique_ptr<NTupleInformation> &t_ntupleInformationOneRun,
+        std::unique_ptr<RunMetrics> &t_runMetrics) {
+    std::map<int, MRDInformation> mrdInformationOneRun {
+            t_ntupleInformationOneRun->getMRDInformation() };
+    double late = 3800.0;
+    double signalBegin = 1000.0;
+    double signalEnd = 2500.0;
+    int hitsInWindow { 0 };
+    int hitsLate { 0 };
+    int hitsAll { 0 };
+    int clustersInWindow { 0 };
+    int clustersLate { 0 };
+    int clustersAll { 0 };
+
+    std::map<int, double> numberOfHitsPerChannelPerEvent;
+    int numberOfEvents = mrdInformationOneRun.size();
+
+    for (const auto& [event, mrdInformationOneEvent] : mrdInformationOneRun) {
+        clustersAll += mrdInformationOneEvent.numberOfClusters;
+        for (int iCluster = 0; iCluster < mrdInformationOneEvent.numberOfClusters; iCluster++) {
+
+            if (mrdInformationOneEvent.clusterTimes.at(iCluster) > late) {
+                clustersLate++;
+            } else if (mrdInformationOneEvent.clusterTimes.at(iCluster) > signalBegin
+                    and mrdInformationOneEvent.clusterTimes.at(iCluster) < signalEnd) {
+                clustersInWindow++;
+            }
+            hitsAll += static_cast<int>(mrdInformationOneEvent.hitTimes.at(iCluster).size());
+            for (size_t iHit = 0; iHit < mrdInformationOneEvent.hitTimes.at(iCluster).size();
+                    iHit++) {
+                int detectorID = mrdInformationOneEvent.detectorIDs.at(iCluster).at(iHit);
+                numberOfHitsPerChannelPerEvent[detectorID] += (1.0 / static_cast<double>(numberOfEvents));
+                if (mrdInformationOneEvent.hitTimes.at(iCluster).at(iHit) > late) {
+                    hitsLate++;
+                } else if (mrdInformationOneEvent.hitTimes.at(iCluster).at(iHit) > signalBegin
+                        and mrdInformationOneEvent.hitTimes.at(iCluster).at(iHit) < signalEnd) {
+                    hitsInWindow++;
+                }
+            } //end for loop hits
+
+        } //end for loop clusters
+
+    } // end for loop events
+
+    double hitsInWindowVsAll = static_cast<double>(hitsInWindow) / static_cast<double>(hitsAll);
+    double lateHitsVsAll = static_cast<double>(hitsLate) / static_cast<double>(hitsAll);
+    double clustersInWindowVsAll = static_cast<double>(clustersInWindow)
+            / static_cast<double>(clustersAll);
+    double lateClustersVsAll = static_cast<double>(clustersLate) / static_cast<double>(clustersAll);
+    double clusterVsEvents = static_cast<double>(clustersAll) / static_cast<double>(numberOfEvents);
+    double hitsPerEvent = static_cast<double>(hitsAll) / static_cast<double>(numberOfEvents);
+    t_runMetrics->setMRDMetrics(hitsInWindowVsAll, lateHitsVsAll, clusterVsEvents, hitsPerEvent,
+            numberOfHitsPerChannelPerEvent, clustersInWindowVsAll, lateClustersVsAll);
 
 }

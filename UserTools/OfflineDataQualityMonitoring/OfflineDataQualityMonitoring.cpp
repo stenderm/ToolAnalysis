@@ -42,12 +42,14 @@ bool OfflineDataQualityMonitoring::Execute() {
         std::unique_ptr<NTupleInformation> nTupleInformationOneRun = std::make_unique
                 < NTupleInformation > (std::get<0>(aRun));
         loadSingleRunObject.extractNtupleInformation(std::get<0>(aRun), std::get<2>(aRun),
-                m_config_tank_tree_name, m_config_verbosity, nTupleInformationOneRun);
+                m_config_tank_tree_name, m_config_MRD_tree_name, m_config_verbosity, nTupleInformationOneRun);
         std::unique_ptr<RunMetrics> runMetricsOneRun = std::make_unique < RunMetrics
                 > (std::get<0>(aRun), std::get<1>(aRun));
         calculateMetricsObject.calculateTankCharge(nTupleInformationOneRun, runMetricsOneRun);
+        calculateMetricsObject.calculateMRDMetrics(nTupleInformationOneRun, runMetricsOneRun);
         runMetricsOneRun->printTankCharge();
         graphs->setTankCharge(runMetricsOneRun);
+        graphs->setMRDMetrics(runMetricsOneRun);
     }
     graphs->drawAndSave(m_config_save_plots_as_pictures, m_config_picture_save_directory,
             m_config_root_file_name, m_config_save_plots_as_file);

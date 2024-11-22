@@ -21,6 +21,9 @@ public:
     virtual ~CalculateMetrics();
     void calculateTankCharge(const std::unique_ptr<NTupleInformation>& t_ntupleInformationOneRun,
                              std::unique_ptr<RunMetrics>& t_runMetrics);
+    void calculateMRDMetrics(
+            const std::unique_ptr<NTupleInformation> &t_ntupleInformationOneRun,
+            std::unique_ptr<RunMetrics> &t_runMetrics);
 };
 
 #endif /* INCLUDE_CALCULATEMETRICS_HH_ */

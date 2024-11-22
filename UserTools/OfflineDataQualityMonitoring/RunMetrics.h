@@ -10,6 +10,7 @@
 
 #include <vector>
 #include <string>
+#include <map>
 
 #include "RunMode.h"
 /*
@@ -36,9 +37,13 @@ public:
                               double t_stdChargeBalancePerCluster);
     void setTankTimeValues(double t_meanTimePerCluster, double t_stdTimePerCluster,
                            double t_meanOfMeanTimePerEvent, double t_stdOfMeanTimePerEvent);
-    void setNumberOfClusterChargeBalanceAnomaly(int t_numberOfClusterChargeBalanceAnomaly){
+    void setNumberOfClusterChargeBalanceAnomaly(int t_numberOfClusterChargeBalanceAnomaly) {
         m_number_of_charge_balance_anomalies = t_numberOfClusterChargeBalanceAnomaly;
     }
+    void setMRDMetrics(double t_hitsInWindowVsAllHits, double t_lateHitsVsAllHits,
+                       double t_clustersPerEvent, double t_HitsPerEvent,
+                       std::map<int, double> t_hitsPerEventPerChannel, double t_clustersInWindowVsAllClusters,
+                       double t_lateClustersVsAllClusters);
 
     void printTankCharge();
     int getRunNumber() const {
@@ -116,6 +121,36 @@ public:
     RunMode getRunMode() const {
         return m_run_mode;
     }
+
+    double getClustersPerEvent() const {
+        return m_clusters_per_event;
+    }
+
+    double getHitsInSignalWindowVsAllHits() const {
+        return m_hits_in_signal_window_vs_all_hits;
+    }
+
+    double getHitsPerEvent() const {
+        return m_hits_per_event;
+    }
+
+    const std::map<int, double>& getHitsPerEventPerChannel() const {
+        return m_hits_per_event_per_channel;
+    }
+
+    double getLateHitsVsAllHits() const {
+        return m_late_hits_vs_all_hits;
+    }
+
+    double getLateClustersVsAllClusters() const {
+        return m_late_clusters_vs_all_clusters;
+    }
+
+    double getClustersInSignalWindowVsAllClusters() const {
+        return m_clusters_in_signal_window_vs_all_clusters;
+    }
+
+
 private:
     int m_run_number { };
     size_t m_number_of_events { };
@@ -155,6 +190,16 @@ private:
     int m_number_of_charge_balance_anomalies { };
 
     RunMode m_run_mode { };
+
+    ///MRD Values
+    // ToDo: These could also all be produced with mean and std.
+    double m_hits_in_signal_window_vs_all_hits { };
+    double m_late_hits_vs_all_hits { };
+    double m_clusters_in_signal_window_vs_all_clusters { };
+    double m_late_clusters_vs_all_clusters { };
+    double m_clusters_per_event { };
+    double m_hits_per_event { };
+    std::map<int, double> m_hits_per_event_per_channel { };
 
 };
 

@@ -71,6 +71,19 @@ void RunMetrics::setTankTimeValues(double t_meanTimePerCluster, double t_stdTime
     m_std_mean_time_per_event = t_stdOfMeanTimePerEvent;
 }
 
+void RunMetrics::setMRDMetrics(double t_hitsInWindowVsAllHits, double t_lateHitsVsAllHits,
+                   double t_clustersPerEvent, double t_HitsPerEvent,
+                   std::map<int, double> t_hitsPerEventPerChannel,double t_clustersInWindowVsAllClusters,
+                   double t_lateClustersVsAllClusters){
+    m_hits_in_signal_window_vs_all_hits = t_hitsInWindowVsAllHits;
+    m_late_hits_vs_all_hits = t_lateHitsVsAllHits;
+    m_clusters_per_event = t_clustersPerEvent;
+    m_hits_per_event = t_HitsPerEvent;
+    m_hits_per_event_per_channel = t_hitsPerEventPerChannel;
+    m_clusters_in_signal_window_vs_all_clusters = t_clustersInWindowVsAllClusters;
+    m_late_clusters_vs_all_clusters = t_lateClustersVsAllClusters;
+}
+
 
 void RunMetrics::printTankCharge(){
     std::cout << "\n";

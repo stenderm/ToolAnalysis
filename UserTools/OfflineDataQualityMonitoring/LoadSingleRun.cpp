@@ -12,6 +12,7 @@
 #include <map>
 #include <memory>
 #include "TankInformation.h"
+#include "MRDInformation.h"
 
 LoadSingleRun::LoadSingleRun() {
     // default constructor
@@ -23,7 +24,7 @@ LoadSingleRun::~LoadSingleRun() {
 
 void LoadSingleRun::extractNtupleInformation(
         int t_runNumber, const std::vector<std::string> &t_fileNames,
-        const std::string& t_tankTreeName, int t_verbosity,
+        const std::string& t_tankTreeName, const std::string& t_MRDTreeName, int t_verbosity,
         std::unique_ptr<NTupleInformation> &t_ntupleInformationOneRun) {
     for (auto aFileName : t_fileNames) {
         std::shared_ptr<TFile> nTupleFile { std::make_shared<TFile>(aFileName.c_str(), "READ") };
@@ -36,6 +37,7 @@ void LoadSingleRun::extractNtupleInformation(
         }
         loadInformationTank(nTupleFile, t_tankTreeName,
                             t_verbosity, t_ntupleInformationOneRun);
+        loadInformationMRD(nTupleFile, t_MRDTreeName, t_verbosity, t_ntupleInformationOneRun);
         //Define trees load some stuff at first, return NTupleInformation object?
         nTupleFile->Close();
     }
@@ -59,13 +61,25 @@ void LoadSingleRun::loadInformationMRD(
 //    }
     ROOT::RDataFrame mrdDataFrame = ROOT::RDataFrame(t_MRDTreeName, t_inputFile.get());
     ROOT::RDF::RResultPtr<std::vector<int> > eventNumbers { mrdDataFrame.Take<int>("eventNumber") };
-    ROOT::RDF::RResultPtr<std::vector<int> > clusterHits { mrdDataFrame.Take<double>("clusterHits") };
+//    ROOT::RDF::RResultPtr<std::vector<int> > clusterHits { mrdDataFrame.Take<double>("clusterHits") };
     ROOT::RDF::RResultPtr<std::vector<double> > clusterTimes { mrdDataFrame.Take<double>("clusterTime") };
-    ROOT::RDF::RResultPtr<std::vector<double> > clusterTimesSigma { mrdDataFrame.Take<double>("clusterTimeSigma") };
-    ROOT::RDF::RResultPtr<std::vector<std::vector<double> > > hitTimes { mrdDataFrame.Take<double>("MRDhitT") };
-    ROOT::RDF::RResultPtr<std::vector<std::vector<int> > > detectorIDs { mrdDataFrame.Take<double>("MRDhitDetID") };
-    ROOT::RDF::RResultPtr<std::vector<int> > numberOfClusterTracks { mrdDataFrame.Take<double>("numClusterTracks") };
-    ROOT::RDF::RResultPtr<std::vector<std::vector<double> > > trackLengths { mrdDataFrame.Take<double>("MRDTrackLength") };
+//    ROOT::RDF::RResultPtr<std::vector<double> > clusterTimesSigma { mrdDataFrame.Take<double>("clusterTimeSigma") };
+    ROOT::RDF::RResultPtr<std::vector<std::vector<double> > > hitTimes { mrdDataFrame.Take<std::vector<double> >("MRDhitT") };
+    ROOT::RDF::RResultPtr<std::vector<std::vector<int> > > detectorIDs { mrdDataFrame.Take<std::vector<int> >("MRDhitDetID") };
+//    ROOT::RDF::RResultPtr<std::vector<int> > numberOfClusterTracks { mrdDataFrame.Take<double>("numClusterTracks") };
+//    ROOT::RDF::RResultPtr<std::vector<std::vector<double> > > trackLengths { mrdDataFrame.Take<double>("MRDTrackLength") };
+
+    std::map<int, MRDInformation> runMRDInformation;
+
+    for (size_t iCluster = 0; iCluster < eventNumbers->size(); ++iCluster) {
+        int eventNumber = (*eventNumbers)[iCluster];
+        runMRDInformation[eventNumber].clusterTimes.push_back((*clusterTimes)[iCluster]);
+        runMRDInformation[eventNumber].detectorIDs.push_back((*detectorIDs)[iCluster]);
+        runMRDInformation[eventNumber].hitTimes.push_back((*hitTimes)[iCluster]);
+        runMRDInformation[eventNumber].numberOfClusters++;
+    }
+
+    t_ntupleInformationOneRun->setMRDInformation(runMRDInformation);
 }
 
 void LoadSingleRun::loadInformationTank(
@@ -86,13 +100,13 @@ void LoadSingleRun::loadInformationTank(
     std::map<int, TankInformation> runTankInformation;
     int globalNumberOfClusters { 0 };
     // Assign the properties to the corresponding event number
-    for (size_t iEvent = 0; iEvent < eventNumbers->size(); ++iEvent) {
-        int eventNumber = (*eventNumbers)[iEvent];
-        runTankInformation[eventNumber].clusterCharge.push_back((*clusterCharges)[iEvent]);
-        runTankInformation[eventNumber].clusterTime.push_back((*clusterTimes)[iEvent]);
-        runTankInformation[eventNumber].clusterChargePE.push_back((*clusterChargesPE)[iEvent]);
-        runTankInformation[eventNumber].clusterChargeMaxPE.push_back((*clusterChargesMaxPE)[iEvent]);
-        runTankInformation[eventNumber].clusterChargeBalance.push_back((*clusterChargeBalance)[iEvent]);
+    for (size_t iCluster = 0; iCluster < eventNumbers->size(); ++iCluster) {
+        int eventNumber = (*eventNumbers)[iCluster];
+        runTankInformation[eventNumber].clusterCharge.push_back((*clusterCharges)[iCluster]);
+        runTankInformation[eventNumber].clusterTime.push_back((*clusterTimes)[iCluster]);
+        runTankInformation[eventNumber].clusterChargePE.push_back((*clusterChargesPE)[iCluster]);
+        runTankInformation[eventNumber].clusterChargeMaxPE.push_back((*clusterChargesMaxPE)[iCluster]);
+        runTankInformation[eventNumber].clusterChargeBalance.push_back((*clusterChargeBalance)[iCluster]);
         runTankInformation[eventNumber].numberOfClusters++;
         globalNumberOfClusters++;
     }
