@@ -1,8 +1,14 @@
 # Config File for ReconstructionBenchmark
 # =======================================input=======================================
+# Input mode: Should be "Old" for files created with PhaseIITreeMaker, "New" for files created with the ANNIEEventTreeMaker or "Both". 
+# For both, two list files needs to be provided.
+inputMode Both
 # The input file should be a list file containing all files to load. The paths should be absolute.
 # Command for finding and adding files to a file: find ~+ -type f -name "*.root" > /nfs/neutrino/data4/stenderm/PostDoc/ANNIETTR/RecoResults/files.list 
-filename DataSamples/ntuples/list.txt
+# This of is for files created with the PhaseIITreeMaker
+filenameOld DataSamples/ntuples/list.txt
+# This of is for files created with the ANNIEEventMaker
+filenameNew DataSamples/BeamClusterTrees/newlist.txt
 # Define the prefix that is written directly in front of the run number in the file names
 # Make sure that the sequence is unique to the file path and in front of the run number
 prefix Run_R
@@ -11,7 +17,7 @@ suffix _
 # Define the run modes, in which the ntuples were produced. 
 # Possible modes: "Beam", "LED", "Laser", "AmBe", "Cosmic", "Any"
 # With "Any" all files will be read and categorized per run mode and then drawn in different colors
-runMode Any
+runMode Beam
 # Name of the tree name for the trigger data
 triggerTreeName phaseIITriggerTree
 # Name of the tree name for the tank data
@@ -37,3 +43,6 @@ pictureDirectory plots/
 saveHistogramsInROOTFile 1
 # File name for saving the histograms
 outputROOTFileName plots/output.root
+
+
+#max 331, min 26

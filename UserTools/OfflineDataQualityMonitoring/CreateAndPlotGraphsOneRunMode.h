@@ -18,19 +18,28 @@
 /*
  *
  */
-class CreateAndPlotGraphsOneRunMode : public CreateAndPlotGraphsBase {
+class CreateAndPlotGraphsOneRunMode: public CreateAndPlotGraphsBase {
 public:
     CreateAndPlotGraphsOneRunMode();
     virtual ~CreateAndPlotGraphsOneRunMode();
     void setMRDMetrics(const std::unique_ptr<RunMetrics> &t_runMetrics) override;
-    void setTankCharge(const std::unique_ptr<RunMetrics>& t_runMetrics) override;
-    void drawAndSave(bool t_saveHistogramsAsPictures, std::string t_saveDirectory, std::string t_fileName, bool t_saveAsRoot) override;
+    void setTankCharge(const std::unique_ptr<RunMetrics> &t_runMetrics) override;
+    void drawAndSave(bool t_saveHistogramsAsPictures, const std::string &t_saveDirectory,
+                     const std::string &t_fileName, bool t_saveAsRoot) override;
 private:
     std::vector<CanvasAndGraph> m_canvases_and_graphs_tank;
     std::vector<CanvasAndGraph> m_canvases_and_graphs_mrd;
-    void matchFillValueToGraph(const CanvasAndGraph& t_graph, const std::unique_ptr<RunMetrics>& t_runMetrics);
-    void matchFillValueToGraphMRD(const CanvasAndGraph &t_graph, const std::unique_ptr<RunMetrics> &t_runMetrics);
-    bool m_draw_error {false};
+    std::vector<CanvasAndGraph> m_canvases_and_graphs_mrd_channels;
+    void matchFillValueToGraph(const CanvasAndGraph &t_graph,
+                               const std::unique_ptr<RunMetrics> &t_runMetrics);
+    void matchFillValueToGraphMRD(const CanvasAndGraph &t_graph,
+                                  const std::unique_ptr<RunMetrics> &t_runMetrics);
+    void matchFillValueToGraphMRDChannels(const CanvasAndGraph &t_graph, const std::unique_ptr<RunMetrics> &t_runMetrics);
+    void drawAndSavePerSubsystem(bool t_saveHistogramsAsPictures,
+                                 const std::string &t_saveDirectory, const std::string &t_fileName,
+                                 bool t_saveAsRoot,
+                                 const std::vector<CanvasAndGraph> &t_canvasAndGraphs);
+    bool m_draw_error { false };
     bool m_draw_horizontal_error { false };
 };
 

@@ -20,9 +20,9 @@ LoadFileList::~LoadFileList() {
 }
 
 //ToDo: Here is some duplicate code!
-void LoadFileList::retrieveFileNamesFromListFileWithMatchingRunMode(std::string t_fileListName,
+void LoadFileList::retrieveFileNamesFromListFileWithMatchingRunMode(const std::string& t_fileListName,
                                                                     int t_verbosity,
-                                                                    std::string t_runMode) {
+                                                                    const std::string& t_runMode) {
     m_list_of_file_names.clear();
     std::fstream listFile;
     listFile.open(t_fileListName, std::ios::in);
@@ -112,7 +112,7 @@ void LoadFileList::assignFilesToRun(int t_verbosity, const std::string &t_prefix
         if (t_verbosity > 1) {
             std::cout << oneFile.first << " with extracted run number " << runNumber << "\n";
         }
-    }
+    }//end for loop file names
 }
 
 int LoadFileList::extractRunNumberFromFileName(const std::string &t_fileName,
@@ -164,3 +164,41 @@ void LoadFileList::printFileNamesAssignedToRunNumber() {
 
 }
 
+// Currently, this type of ntuple is only created for Beam runs, so that it is hardcoded here and no need arises for ordering files to a runtype
+void LoadFileList::retrieveFileNamesFromNewListFile(const std::string& t_fileListName, int t_verbosity){
+    m_list_of_file_names.clear();
+    std::fstream listFile;
+    listFile.open(t_fileListName, std::ios::in);
+    if (!listFile.is_open()) {
+        std::string logMessage = "Cannot open list file! Provided name is " + t_fileListName;
+        throw std::invalid_argument(logMessage);
+    }
+    std::string aLine;
+    if (t_verbosity > 1) {
+        std::cout << "\n";
+        std::cout << "Loaded file names: \n";
+    }
+    while (getline(listFile, aLine)) {
+        if (t_verbosity > 1) {
+            std::cout << aLine << "\n";
+        }
+            m_list_of_file_names.push_back(std::make_pair(aLine, getRunModeFromString("Beam")));
+    }
+
+    std::sort(m_list_of_file_names.begin(), m_list_of_file_names.end());
+    if (t_verbosity > 1) {
+        std::cout << "\n";
+        std::cout << "Sorted file Names: \n";
+    }
+    //ToDo: That is not really the best solution, since I am expecting only one file and still work with a vector
+    //to not change the structure of the class completely or add a new one
+    for (const std::pair<std::string, RunMode>& oneFile : m_list_of_file_names) {
+        int runNumber = extractRunNumberFromFileName(oneFile.first, "BeamCluster_", ".root", t_verbosity);
+        std::vector<std::string> tempFileName { };
+        tempFileName.push_back(oneFile.first);
+        m_file_names_assigned_run_number.push_back( std::make_tuple(runNumber, oneFile.second, tempFileName) );
+        if (t_verbosity > 1) {
+            std::cout << oneFile.first << " with extracted run number " << runNumber << "\n";
+        }
+    }
+}

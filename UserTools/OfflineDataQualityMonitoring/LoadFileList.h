@@ -21,7 +21,7 @@ public:
     LoadFileList();
     virtual ~LoadFileList();
     // Retrieve the .root file names from the list file. This list will be unordered.
-    void retrieveFileNamesFromListFileWithMatchingRunMode(std::string t_fileListName, int t_verbosity, std::string t_runMode);
+    void retrieveFileNamesFromListFileWithMatchingRunMode(const std::string& t_fileListName, int t_verbosity, const std::string& t_runMode);
     // Retrieve the .root file names from the list file for all possible modes. This list will be unordered.
     void retrieveFileNamesFromListFileForAllRunModes(const std::string& t_fileListName, int t_verbosity);
     // Assigns the file names from the list of file names to the corresponding runs, since some runs are in multiple files
@@ -31,6 +31,8 @@ public:
     void printFileNamesAssignedToRunNumber();
     // Getter for the vector of pairs<run number, vector of file names corresponding to run number>
     std::vector<std::tuple<int, RunMode, std::vector<std::string> > > getFileNamesAsTuples(){return m_file_names_assigned_run_number;}
+    // Retrieves the files for the newer format from the file list
+    void retrieveFileNamesFromNewListFile(const std::string& t_fileListName, int t_verbosity);
 private:
     // A vector of pairs of filename and run mode
     std::vector<std::pair<std::string, RunMode> > m_list_of_file_names { };

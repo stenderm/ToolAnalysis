@@ -176,8 +176,8 @@ void CreateAndPlotGraphsMultipleRunModes::matchFillValueToGraph(
 }
 
 void CreateAndPlotGraphsMultipleRunModes::drawAndSave(bool t_saveHistogramsAsPictures,
-                                                      std::string t_saveDirectory,
-                                                      std::string t_fileName, bool t_saveAsRoot) {
+                                                      const std::string& t_saveDirectory,
+                                                      const std::string& t_fileName, bool t_saveAsRoot) {
     std::unique_ptr<TFile> outputROOTFile;
     if (t_saveAsRoot) {
         outputROOTFile = std::make_unique<TFile>(t_fileName.c_str(), "RECREATE");

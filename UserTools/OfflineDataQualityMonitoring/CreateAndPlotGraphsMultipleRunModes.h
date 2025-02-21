@@ -20,7 +20,7 @@ public:
     virtual ~CreateAndPlotGraphsMultipleRunModes();
     void setTankCharge(const std::unique_ptr<RunMetrics>& t_runMetrics) override;
     void setMRDMetrics(const std::unique_ptr<RunMetrics> &t_runMetrics) override;
-    void drawAndSave(bool t_saveHistogramsAsPictures,std::string t_saveDirectory, std::string t_fileName, bool t_saveAsRoot) override;
+    void drawAndSave(bool t_saveHistogramsAsPictures, const std::string& t_saveDirectory, const std::string& t_fileName, bool t_saveAsRoot) override;
 
 private:
     std::vector<CanvasAndMultipleGraphs> m_canvases_and_graphs_tank;

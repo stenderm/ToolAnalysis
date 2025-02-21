@@ -20,7 +20,7 @@ public:
     virtual ~CreateAndPlotGraphsBase() = default;
     virtual void setTankCharge(const std::unique_ptr<RunMetrics>& t_runMetrics) = 0;
     virtual void setMRDMetrics(const std::unique_ptr<RunMetrics> &t_runMetrics) = 0;
-    virtual void drawAndSave(bool t_saveHistogramsAsPictures, std::string t_saveDirectory, std::string t_fileName, bool t_saveAsRoot) = 0;
+    virtual void drawAndSave(bool t_saveHistogramsAsPictures, const std::string& t_saveDirectory, const std::string& t_fileName, bool t_saveAsRoot) = 0;
 
 };
 

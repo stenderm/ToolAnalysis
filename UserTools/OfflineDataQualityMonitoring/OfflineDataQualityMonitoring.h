@@ -27,8 +27,12 @@ public:
 
 private:
     ///Configuration Variables
-    // Name of the list file to load
-    std::string m_config_list_file_name { };
+    // Input Mode, if files created with PhaseIITreeMaker (Old) or files created with the ANNIEEventTreeMaker (New) is expected
+    std::string m_config_input_mode { };
+    // Name of the list file to load for PhaseIITreeMaker files (old)
+    std::string m_config_list_file_name_old { };
+    // Name of the list file to load for ANNIEEventTreeMaker files (new)
+    std::string m_config_list_file_name_new { };
     // Prefix of the run number ToDo: Needs adjustment probably for newer files
     std::string m_config_run_number_prefix { };
     // Suffix of the run number
@@ -65,6 +69,8 @@ private:
     void checkConfigurationVariables();
     // checks if the run mode from the configuration file exists in the vector of run modes
     void checkRunMode() const;
+    // check if the input mode from the configuration file is one of Old, New or Both
+    void checkInputMode() const;
     // checks if the number of runs per point from the configuration file is bigger or equal to one, throws exception if not
     void checkNumberOfRunsPerPoint() const;
     // checks if the verbosity is 0, 1 or 2, if it is higher, set to 2, if it is lower to 0
@@ -72,7 +78,9 @@ private:
     // checks the validity of the save paths and modes
     void checkSaveConfig() const;
 
-    std::vector<std::tuple<int, RunMode, std::vector<std::string> > > loadListFile();
+    std::vector<std::tuple<int, RunMode, std::vector<std::string> > > loadListFileOld();
+
+    std::vector<std::tuple<int, RunMode, std::vector<std::string> > > loadListFileNew();
 };
 
 #endif

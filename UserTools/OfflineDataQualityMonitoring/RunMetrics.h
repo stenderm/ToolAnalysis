@@ -40,6 +40,10 @@ public:
     void setNumberOfClusterChargeBalanceAnomaly(int t_numberOfClusterChargeBalanceAnomaly) {
         m_number_of_charge_balance_anomalies = t_numberOfClusterChargeBalanceAnomaly;
     }
+    void setInfChargeNumbers(int t_numberOfInfMaxPE, int t_numberOfInfPE, int t_numberOfInfChargeBalance);
+
+    void setInfChargeRatios(double t_ratioOfInfMaxPE, double t_ratioOfInfPE, double t_ratioOfInfChargeBalance);
+
     void setMRDMetrics(double t_hitsInWindowVsAllHits, double t_lateHitsVsAllHits,
                        double t_clustersPerEvent, double t_HitsPerEvent,
                        std::map<int, double> t_hitsPerEventPerChannel, double t_clustersInWindowVsAllClusters,
@@ -150,6 +154,33 @@ public:
         return m_clusters_in_signal_window_vs_all_clusters;
     }
 
+    int getNumberOfChargeBalanceAnomalies() const {
+        return m_number_of_charge_balance_anomalies;
+    }
+
+    int getNumberOfInfChargeBalance() const {
+        return m_number_of_inf_charge_balance;
+    }
+
+    int getNumberOfInfMaxPe() const {
+        return m_number_of_inf_max_pe;
+    }
+
+    int getNumberOfInfPe() const {
+        return m_number_of_inf_pe;
+    }
+
+    double getRatioOfInfChargeBalance() const {
+        return m_ratio_of_inf_charge_balance;
+    }
+
+    double getRatioOfInfMaxPe() const {
+        return m_ratio_of_inf_max_pe;
+    }
+
+    double getRatioOfInfPe() const {
+        return m_ratio_of_inf_pe;
+    }
 
 private:
     int m_run_number { };
@@ -188,6 +219,15 @@ private:
     double m_std_mean_time_per_event { };
 
     int m_number_of_charge_balance_anomalies { };
+
+    int m_number_of_inf_charge_balance { };
+    int m_number_of_inf_max_pe { };
+    int m_number_of_inf_pe { };
+
+    double m_ratio_of_inf_charge_balance { };
+    double m_ratio_of_inf_max_pe { };
+    double m_ratio_of_inf_pe { };
+
 
     RunMode m_run_mode { };
 

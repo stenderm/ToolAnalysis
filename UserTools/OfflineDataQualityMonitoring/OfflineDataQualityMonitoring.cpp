@@ -26,8 +26,14 @@ bool OfflineDataQualityMonitoring::Initialise(std::string configfile, DataModel 
 }
 
 bool OfflineDataQualityMonitoring::Execute() {
-    std::vector<std::tuple<int, RunMode, std::vector<std::string> > > fileNamesAsPairs =
-            loadListFile();
+    std::vector<std::tuple<int, RunMode, std::vector<std::string> > > fileNamesAsPairsOld =
+            loadListFileOld();
+    std::vector<std::tuple<int, RunMode, std::vector<std::string> > > fileNamesAsPairsNew =
+            loadListFileNew();
+
+    fileNamesAsPairsOld.insert(std::end(fileNamesAsPairsOld), std::begin(fileNamesAsPairsNew),
+            std::end(fileNamesAsPairsNew));
+
     LoadSingleRun loadSingleRunObject = LoadSingleRun();
     CalculateMetrics calculateMetricsObject = CalculateMetrics();
 
@@ -38,13 +44,18 @@ bool OfflineDataQualityMonitoring::Execute() {
         graphs = std::make_unique<CreateAndPlotGraphsOneRunMode>();
     }
     // main loop over all runs
-    for (auto aRun : fileNamesAsPairs) {
+    for (auto aRun : fileNamesAsPairsOld) {
+
         std::unique_ptr<NTupleInformation> nTupleInformationOneRun = std::make_unique
                 < NTupleInformation > (std::get<0>(aRun));
+
         loadSingleRunObject.extractNtupleInformation(std::get<0>(aRun), std::get<2>(aRun),
-                m_config_tank_tree_name, m_config_MRD_tree_name, m_config_verbosity, nTupleInformationOneRun);
+                m_config_tank_tree_name, m_config_MRD_tree_name, m_config_verbosity,
+                nTupleInformationOneRun);
+
         std::unique_ptr<RunMetrics> runMetricsOneRun = std::make_unique < RunMetrics
                 > (std::get<0>(aRun), std::get<1>(aRun));
+
         calculateMetricsObject.calculateTankCharge(nTupleInformationOneRun, runMetricsOneRun);
         calculateMetricsObject.calculateMRDMetrics(nTupleInformationOneRun, runMetricsOneRun);
         runMetricsOneRun->printTankCharge();
@@ -62,31 +73,41 @@ bool OfflineDataQualityMonitoring::Finalise() {
     return true;
 }
 
-std::vector<std::tuple<int, RunMode, std::vector<std::string> > > OfflineDataQualityMonitoring::loadListFile() {
+std::vector<std::tuple<int, RunMode, std::vector<std::string> > > OfflineDataQualityMonitoring::loadListFileOld() {
     LoadFileList loadFileListObject = LoadFileList();
+
     if (m_config_run_mode == "Any") {
-        loadFileListObject.retrieveFileNamesFromListFileForAllRunModes(
-                m_config_list_file_name,
+        loadFileListObject.retrieveFileNamesFromListFileForAllRunModes(m_config_list_file_name_old,
                 m_config_verbosity);
     } else {
         loadFileListObject.retrieveFileNamesFromListFileWithMatchingRunMode(
-                m_config_list_file_name,
-                m_config_verbosity, m_config_run_mode);
+                m_config_list_file_name_old, m_config_verbosity, m_config_run_mode);
     }
-    loadFileListObject.assignFilesToRun(m_config_verbosity,
-            m_config_run_number_prefix, m_config_run_number_suffix);
+    loadFileListObject.assignFilesToRun(m_config_verbosity, m_config_run_number_prefix,
+            m_config_run_number_suffix);
     if (m_config_verbosity > 1) {
         loadFileListObject.printFileNamesAssignedToRunNumber();
     }
     return loadFileListObject.getFileNamesAsTuples();
 }
 
+std::vector<std::tuple<int, RunMode, std::vector<std::string> > > OfflineDataQualityMonitoring::loadListFileNew() {
+    LoadFileList loadFileListObject = LoadFileList();
+    loadFileListObject.retrieveFileNamesFromNewListFile(m_config_list_file_name_new,
+            m_config_verbosity);
+    if (m_config_verbosity > 1) {
+        loadFileListObject.printFileNamesAssignedToRunNumber();
+    }
+    return loadFileListObject.getFileNamesAsTuples();
+}
 void OfflineDataQualityMonitoring::loadAndCheckConfiguration(const std::string &t_configfileName) {
     if (t_configfileName != "") {
         m_variables.Initialise(t_configfileName); // loading config file
     }
     m_variables.Print();
-    m_variables.Get("filename", m_config_list_file_name);
+    m_variables.Get("inputMode", m_config_input_mode);
+    m_variables.Get("filenameOld", m_config_list_file_name_old);
+    m_variables.Get("filenameNew", m_config_list_file_name_new);
     m_variables.Get("prefix", m_config_run_number_prefix);
     m_variables.Get("suffix", m_config_run_number_suffix);
     m_variables.Get("runMode", m_config_run_mode);
@@ -107,6 +128,7 @@ void OfflineDataQualityMonitoring::loadAndCheckConfiguration(const std::string &
 }
 
 void OfflineDataQualityMonitoring::checkConfigurationVariables() {
+    checkInputMode();
     checkRunMode();
     checkNumberOfRunsPerPoint();
     checkAndAdjustVerbosity();
@@ -128,6 +150,17 @@ void OfflineDataQualityMonitoring::checkRunMode() const {
         }
     }
     throw std::invalid_argument(logMessage);
+}
+
+void OfflineDataQualityMonitoring::checkInputMode() const {
+    if (m_config_input_mode != "Old" and m_config_input_mode != "New"
+            and m_config_input_mode != "Both") {
+        std::string logMessage { "Unexpected input mode provided! " };
+        logMessage.append(m_config_input_mode);
+        logMessage.append(" was provided, candidates are ");
+        logMessage.append("Old, New and Both");
+        throw std::invalid_argument(logMessage);
+    }
 }
 
 void OfflineDataQualityMonitoring::checkNumberOfRunsPerPoint() const {
