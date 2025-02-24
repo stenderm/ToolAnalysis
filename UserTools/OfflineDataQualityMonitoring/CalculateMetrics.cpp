@@ -64,6 +64,13 @@ void CalculateMetrics::calculateTankCharge(
     int numberOfClusterWithMaxPEInf { 0 };
     int numberOfClusterWithPEInf { 0 };
     int numberOfClusterChargeBalanceInf { 0 };
+    int numberOfClusterChargeInf { 0 };
+
+    int numberOfClusterWithMaxPENan { 0 };
+    int numberOfClusterWithPENan { 0 };
+    int numberOfClusterChargeBalanceNan { 0 };
+    int numberOfClusterChargeNan { 0 };
+
     int numberOfClusters { 0 };
 
     for (const auto& [event, tankInformationOneEvent] : tankInformationOneRun) {
@@ -73,20 +80,20 @@ void CalculateMetrics::calculateTankCharge(
         numberOfClusters += tankInformationOneEvent.numberOfClusters;
 
         for (int iCluster = 0; iCluster < tankInformationOneEvent.numberOfClusters; iCluster++) {
-            chargePerCluster.push_back(tankInformationOneEvent.clusterCharge.at(iCluster));
 
             if (std::isinf(tankInformationOneEvent.clusterChargePE.at(iCluster))) {
                 numberOfClusterWithPEInf++;
+            } else if (std::isnan(tankInformationOneEvent.clusterChargePE.at(iCluster))) {
+                numberOfClusterWithPENan++;
             } else {
-
-                if(!std::isnan(tankInformationOneEvent.clusterChargePE.at(iCluster))){
-                    chargePerClusterPE.push_back(tankInformationOneEvent.clusterChargePE.at(iCluster));
-                    chargerPerEventPE += tankInformationOneEvent.clusterChargePE.at(iCluster);
-                }
+                chargePerClusterPE.push_back(tankInformationOneEvent.clusterChargePE.at(iCluster));
+                chargerPerEventPE += tankInformationOneEvent.clusterChargePE.at(iCluster);
             }
 
             if (std::isinf(tankInformationOneEvent.clusterChargeMaxPE.at(iCluster))) {
                 numberOfClusterWithMaxPEInf++;
+            } else if (std::isnan(tankInformationOneEvent.clusterChargeMaxPE.at(iCluster))) {
+                numberOfClusterWithMaxPENan++;
             } else {
                 maxPEPerClusters.push_back(tankInformationOneEvent.clusterChargeMaxPE.at(iCluster));
             }
@@ -97,14 +104,24 @@ void CalculateMetrics::calculateTankCharge(
 
             if (std::isinf(tankInformationOneEvent.clusterChargeBalance.at(iCluster))) {
                 numberOfClusterChargeBalanceInf++;
+            } else if (std::isnan(tankInformationOneEvent.clusterChargeBalance.at(iCluster))) {
+                numberOfClusterChargeBalanceNan++;
             } else {
                 chargeBalancePerCluster.push_back(
                         tankInformationOneEvent.clusterChargeBalance.at(iCluster));
             }
 
-            timePerClusters.push_back(tankInformationOneEvent.clusterTime.at(iCluster));
-            chargePerEvent += tankInformationOneEvent.clusterCharge.at(iCluster);
+            if (std::isinf(tankInformationOneEvent.clusterCharge.at(iCluster))) {
+                numberOfClusterChargeInf++;
+            } else if (std::isnan(tankInformationOneEvent.clusterCharge.at(iCluster))) {
+                numberOfClusterChargeNan++;
+            } else {
+                chargePerCluster.push_back(tankInformationOneEvent.clusterCharge.at(iCluster));
+                chargePerEvent += tankInformationOneEvent.clusterCharge.at(iCluster);
+            }
+
             timePerEvent += tankInformationOneEvent.clusterTime.at(iCluster);
+            timePerClusters.push_back(tankInformationOneEvent.clusterTime.at(iCluster));
 
         }
 
@@ -149,7 +166,8 @@ void CalculateMetrics::calculateTankCharge(
             TMath::Mean(chargeBalancePerCluster.begin(), chargeBalancePerCluster.end()),
             TMath::StdDev(chargeBalancePerCluster.begin(), chargeBalancePerCluster.end()));
 
-    t_runMetrics->setTankTimeValues(TMath::Mean(timePerClusters.begin(), timePerClusters.end()),
+    t_runMetrics->setTankTimeValues(
+            TMath::Mean(timePerClusters.begin(), timePerClusters.end()),
             TMath::StdDev(timePerClusters.begin(), timePerClusters.end()),
             TMath::Mean(meanClusterTime.begin(), meanClusterTime.end()),
             TMath::StdDev(meanClusterTime.begin(), meanClusterTime.end()));
@@ -157,16 +175,22 @@ void CalculateMetrics::calculateTankCharge(
     t_runMetrics->setNumberOfClusterChargeBalanceAnomaly(numberOfClustersWithChargeBalanceOverOne);
 
     t_runMetrics->setInfChargeNumbers(numberOfClusterWithMaxPEInf, numberOfClusterWithPEInf,
-            numberOfClusterChargeBalanceInf);
-    std::cout << numberOfClusterWithMaxPEInf << " " << numberOfClusters << " "
-            << static_cast<double>(numberOfClusterWithMaxPEInf)
-                    / static_cast<double>(numberOfClusters) << "\n";
+                                      numberOfClusterChargeBalanceInf, numberOfClusterChargeInf);
+
     t_runMetrics->setInfChargeRatios(
-            static_cast<double>(numberOfClusterWithMaxPEInf)
-                    / static_cast<double>(numberOfClusters),
+            static_cast<double>(numberOfClusterWithMaxPEInf) / static_cast<double>(numberOfClusters),
             static_cast<double>(numberOfClusterWithPEInf) / static_cast<double>(numberOfClusters),
-            static_cast<double>(numberOfClusterChargeBalanceInf)
-                    / static_cast<double>(numberOfClusters));
+            static_cast<double>(numberOfClusterChargeBalanceInf) / static_cast<double>(numberOfClusters),
+            static_cast<double>(numberOfClusterChargeInf) / static_cast<double>(numberOfClusters));
+
+    t_runMetrics->setNanChargeNumbers(numberOfClusterWithMaxPENan, numberOfClusterWithPENan,
+                                      numberOfClusterChargeBalanceNan, numberOfClusterChargeNan);
+
+    t_runMetrics->setNanChargeRatios(
+            static_cast<double>(numberOfClusterWithMaxPENan) / static_cast<double>(numberOfClusters),
+            static_cast<double>(numberOfClusterWithPENan) / static_cast<double>(numberOfClusters),
+            static_cast<double>(numberOfClusterChargeBalanceNan) / static_cast<double>(numberOfClusters),
+            static_cast<double>(numberOfClusterChargeNan) / static_cast<double>(numberOfClusters));
 
 }
 

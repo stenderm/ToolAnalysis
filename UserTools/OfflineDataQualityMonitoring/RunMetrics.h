@@ -40,14 +40,21 @@ public:
     void setNumberOfClusterChargeBalanceAnomaly(int t_numberOfClusterChargeBalanceAnomaly) {
         m_number_of_charge_balance_anomalies = t_numberOfClusterChargeBalanceAnomaly;
     }
-    void setInfChargeNumbers(int t_numberOfInfMaxPE, int t_numberOfInfPE, int t_numberOfInfChargeBalance);
+    void setInfChargeNumbers(int t_numberOfInfMaxPE, int t_numberOfInfPE,
+                             int t_numberOfInfChargeBalance, int t_numberOfInfCharge);
 
-    void setInfChargeRatios(double t_ratioOfInfMaxPE, double t_ratioOfInfPE, double t_ratioOfInfChargeBalance);
+    void setInfChargeRatios(double t_ratioOfInfMaxPE, double t_ratioOfInfPE,
+                            double t_ratioOfInfChargeBalance, double t_ratioOfInfCharge);
 
+    void setNanChargeNumbers(int t_numberOfNanMaxPE, int t_numberOfNanPE,
+                             int t_numberOfNanChargeBalance, int t_numberOfNanCharge);
+
+    void setNanChargeRatios(double t_ratioOfNanMaxPE, double t_ratioOfNanPE,
+                            double t_ratioOfNanChargeBalance, double t_ratioOfNanCharge);
     void setMRDMetrics(double t_hitsInWindowVsAllHits, double t_lateHitsVsAllHits,
                        double t_clustersPerEvent, double t_HitsPerEvent,
-                       std::map<int, double> t_hitsPerEventPerChannel, double t_clustersInWindowVsAllClusters,
-                       double t_lateClustersVsAllClusters);
+                       std::map<int, double> t_hitsPerEventPerChannel,
+                       double t_clustersInWindowVsAllClusters, double t_lateClustersVsAllClusters);
 
     void printTankCharge();
     int getRunNumber() const {
@@ -182,6 +189,46 @@ public:
         return m_ratio_of_inf_pe;
     }
 
+    int getNumberOfInfCharge() const {
+        return m_number_of_inf_charge;
+    }
+
+    int getNumberOfNanCharge() const {
+        return m_number_of_nan_charge;
+    }
+
+    int getNumberOfNanChargeBalance() const {
+        return m_number_of_nan_charge_balance;
+    }
+
+    int getNumberOfNanMaxPe() const {
+        return m_number_of_nan_max_pe;
+    }
+
+    int getNumberOfNanPe() const {
+        return m_number_of_nan_pe;
+    }
+
+    double getRatioOfInfCharge() const {
+        return m_ratio_of_inf_charge;
+    }
+
+    double getRatioOfNanCharge() const {
+        return m_ratio_of_nan_charge;
+    }
+
+    double getRatioOfNanChargeBalance() const {
+        return m_ratio_of_nan_charge_balance;
+    }
+
+    double getRatioOfNanMaxPe() const {
+        return m_ratio_of_nan_max_pe;
+    }
+
+    double getRatioOfNanPe() const {
+        return m_ratio_of_nan_pe;
+    }
+
 private:
     int m_run_number { };
     size_t m_number_of_events { };
@@ -223,11 +270,22 @@ private:
     int m_number_of_inf_charge_balance { };
     int m_number_of_inf_max_pe { };
     int m_number_of_inf_pe { };
+    int m_number_of_inf_charge { };
 
     double m_ratio_of_inf_charge_balance { };
     double m_ratio_of_inf_max_pe { };
     double m_ratio_of_inf_pe { };
+    double m_ratio_of_inf_charge { };
 
+    int m_number_of_nan_charge_balance { };
+    int m_number_of_nan_max_pe { };
+    int m_number_of_nan_pe { };
+    int m_number_of_nan_charge { };
+
+    double m_ratio_of_nan_charge_balance { };
+    double m_ratio_of_nan_max_pe { };
+    double m_ratio_of_nan_pe { };
+    double m_ratio_of_nan_charge { };
 
     RunMode m_run_mode { };
 

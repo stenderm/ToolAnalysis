@@ -51,7 +51,6 @@ CreateAndPlotGraphsOneRunMode::CreateAndPlotGraphsOneRunMode() {
     m_canvases_and_graphs_tank.push_back(
             CanvasAndGraph(regularXAxis, "Mean Time per Event in ns", subSystemIdentifier, width,
                     height));
-
     m_canvases_and_graphs_tank.push_back(
             CanvasAndGraph(regularXAxis, "Number Of Clusters with Max PE of Inf",
                     subSystemIdentifier, width, height));
@@ -62,6 +61,9 @@ CreateAndPlotGraphsOneRunMode::CreateAndPlotGraphsOneRunMode() {
             CanvasAndGraph(regularXAxis, "Number Of Clusters with Charge Balance of Inf",
                     subSystemIdentifier, width, height));
     m_canvases_and_graphs_tank.push_back(
+            CanvasAndGraph(regularXAxis, "Number Of Clusters with Charge of Inf",
+                    subSystemIdentifier, width, height));
+    m_canvases_and_graphs_tank.push_back(
             CanvasAndGraph(regularXAxis, "Ratio Of Clusters with Max PE of Inf",
                     subSystemIdentifier, width, height));
     m_canvases_and_graphs_tank.push_back(
@@ -69,6 +71,33 @@ CreateAndPlotGraphsOneRunMode::CreateAndPlotGraphsOneRunMode() {
                     width, height));
     m_canvases_and_graphs_tank.push_back(
             CanvasAndGraph(regularXAxis, "Ratio Of Clusters with Charge Balance of Inf",
+                    subSystemIdentifier, width, height));
+    m_canvases_and_graphs_tank.push_back(
+            CanvasAndGraph(regularXAxis, "Ratio Of Clusters with Charge of Inf",
+                    subSystemIdentifier, width, height));
+    m_canvases_and_graphs_tank.push_back(
+            CanvasAndGraph(regularXAxis, "Number Of Clusters with Max PE of Nan",
+                    subSystemIdentifier, width, height));
+    m_canvases_and_graphs_tank.push_back(
+            CanvasAndGraph(regularXAxis, "Number Of Clusters with PE of Nan", subSystemIdentifier,
+                    width, height));
+    m_canvases_and_graphs_tank.push_back(
+            CanvasAndGraph(regularXAxis, "Number Of Clusters with Charge Balance of Nan",
+                    subSystemIdentifier, width, height));
+    m_canvases_and_graphs_tank.push_back(
+            CanvasAndGraph(regularXAxis, "Number Of Clusters with Charge of Nan",
+                    subSystemIdentifier, width, height));
+    m_canvases_and_graphs_tank.push_back(
+            CanvasAndGraph(regularXAxis, "Ratio Of Clusters with Max PE of Nan",
+                    subSystemIdentifier, width, height));
+    m_canvases_and_graphs_tank.push_back(
+            CanvasAndGraph(regularXAxis, "Ratio Of Clusters with PE of Nan", subSystemIdentifier,
+                    width, height));
+    m_canvases_and_graphs_tank.push_back(
+            CanvasAndGraph(regularXAxis, "Ratio Of Clusters with Charge Balance of Nan",
+                    subSystemIdentifier, width, height));
+    m_canvases_and_graphs_tank.push_back(
+            CanvasAndGraph(regularXAxis, "Ratio Of Clusters with Charge of Nan",
                     subSystemIdentifier, width, height));
 
     subSystemIdentifier = "MRD";
@@ -157,13 +186,13 @@ void CreateAndPlotGraphsOneRunMode::matchFillValueToGraphMRD(
         errorToFill = pointToFill / 100.0;
     } else if (t_graph.yAxisTitle == "Number of Clusters per Event") {
         pointToFill = t_runMetrics->getClustersPerEvent();
-        if(pointToFill){
+        if (pointToFill) {
             std::cout << "Cluster per Event " << pointToFill << std::endl;
         }
         errorToFill = pointToFill / 100.0;
     } else if (t_graph.yAxisTitle == "Number of Hits per Event") {
         pointToFill = t_runMetrics->getHitsPerEvent();
-        if(pointToFill){
+        if (pointToFill) {
             std::cout << "Hits per Event " << pointToFill << std::endl;
         }
         errorToFill = pointToFill / 100.0;
@@ -215,7 +244,8 @@ void CreateAndPlotGraphsOneRunMode::matchFillValueToGraph(
         errorToFill = t_runMetrics->getStdChargePerClusterPE();
     } else if (t_graph.yAxisTitle == "Charge per Event in PE") {
         pointToFill = t_runMetrics->getMeanChargePerEventPE();
-        std::cout << t_runMetrics->getRunNumber() << " Mean Charge per Event " << pointToFill << "\n";
+        std::cout << t_runMetrics->getRunNumber() << " Mean Charge per Event " << pointToFill
+                << "\n";
         errorToFill = t_runMetrics->getStdChargePerEventPE();
     } else if (t_graph.yAxisTitle == "Mean Charge per Event in PE") {
         pointToFill = t_runMetrics->getMeanMeanChargePerEventPE();
@@ -241,6 +271,9 @@ void CreateAndPlotGraphsOneRunMode::matchFillValueToGraph(
     } else if (t_graph.yAxisTitle == "Number Of Clusters with Charge Balance of Inf") {
         pointToFill = t_runMetrics->getNumberOfInfChargeBalance();
         errorToFill = 0.0;
+    } else if (t_graph.yAxisTitle == "Number Of Clusters with Charge of Inf") {
+        pointToFill = t_runMetrics->getNumberOfInfCharge();
+        errorToFill = 0.0;
     } else if (t_graph.yAxisTitle == "Ratio Of Clusters with Max PE of Inf") {
         pointToFill = t_runMetrics->getRatioOfInfMaxPe();
         errorToFill = 0.0;
@@ -249,6 +282,33 @@ void CreateAndPlotGraphsOneRunMode::matchFillValueToGraph(
         errorToFill = 0.0;
     } else if (t_graph.yAxisTitle == "Ratio Of Clusters with Charge Balance of Inf") {
         pointToFill = t_runMetrics->getRatioOfInfChargeBalance();
+        errorToFill = 0.0;
+    } else if (t_graph.yAxisTitle == "Ratio Of Clusters with Charge of Inf") {
+        pointToFill = t_runMetrics->getRatioOfInfCharge();
+        errorToFill = 0.0;
+    } else if (t_graph.yAxisTitle == "Number Of Clusters with Max PE of Nan") {
+        pointToFill = t_runMetrics->getNumberOfNanMaxPe();
+        errorToFill = 0.0;
+    } else if (t_graph.yAxisTitle == "Number Of Clusters with PE of Nan") {
+        pointToFill = t_runMetrics->getNumberOfNanPe();
+        errorToFill = 0.0;
+    } else if (t_graph.yAxisTitle == "Number Of Clusters with Charge Balance of Nan") {
+        pointToFill = t_runMetrics->getNumberOfNanChargeBalance();
+        errorToFill = 0.0;
+    } else if (t_graph.yAxisTitle == "Number Of Clusters with Charge of Nan") {
+        pointToFill = t_runMetrics->getNumberOfNanCharge();
+        errorToFill = 0.0;
+    } else if (t_graph.yAxisTitle == "Ratio Of Clusters with Max PE of Nan") {
+        pointToFill = t_runMetrics->getRatioOfNanMaxPe();
+        errorToFill = 0.0;
+    } else if (t_graph.yAxisTitle == "Ratio Of Clusters with PE of Nan") {
+        pointToFill = t_runMetrics->getRatioOfNanPe();
+        errorToFill = 0.0;
+    } else if (t_graph.yAxisTitle == "Ratio Of Clusters with Charge Balance of Nan") {
+        pointToFill = t_runMetrics->getRatioOfNanChargeBalance();
+        errorToFill = 0.0;
+    } else if (t_graph.yAxisTitle == "Ratio Of Clusters with Charge of Nan") {
+        pointToFill = t_runMetrics->getRatioOfNanCharge();
         errorToFill = 0.0;
     }
 

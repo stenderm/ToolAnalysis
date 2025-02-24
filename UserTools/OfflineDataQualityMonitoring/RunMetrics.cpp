@@ -104,16 +104,35 @@ void RunMetrics::printTankCharge() {
 }
 
 void RunMetrics::setInfChargeNumbers(int t_numberOfInfMaxPE, int t_numberOfInfPE,
-                                     int t_numberOfInfChargeBalance) {
+                                     int t_numberOfInfChargeBalance, int t_numberOfInfCharge) {
     m_number_of_inf_max_pe = t_numberOfInfMaxPE;
     m_number_of_inf_pe = t_numberOfInfPE;
     m_number_of_inf_charge_balance = t_numberOfInfChargeBalance;
+    m_number_of_inf_charge = t_numberOfInfCharge;
 }
 
 void RunMetrics::setInfChargeRatios(double t_ratioOfInfMaxPE, double t_ratioOfInfPE,
-                                    double t_ratioOfInfChargeBalance) {
+                                    double t_ratioOfInfChargeBalance, double t_ratioOfInfCharge) {
     m_ratio_of_inf_max_pe = t_ratioOfInfMaxPE;
     m_ratio_of_inf_pe = t_ratioOfInfPE;
     m_ratio_of_inf_charge_balance = t_ratioOfInfChargeBalance;
+    m_ratio_of_inf_charge = t_ratioOfInfCharge;
 }
+
+void RunMetrics::setNanChargeNumbers(int t_numberOfNanMaxPE, int t_numberOfNanPE,
+                                     int t_numberOfNanChargeBalance, int t_numberOfNanCharge) {
+    m_number_of_nan_max_pe = t_numberOfNanMaxPE;
+    m_number_of_nan_pe = t_numberOfNanPE;
+    m_number_of_nan_charge_balance = t_numberOfNanChargeBalance;
+    m_number_of_nan_charge = t_numberOfNanCharge;
+}
+
+void RunMetrics::setNanChargeRatios(double t_ratioOfNanMaxPE, double t_ratioOfNanPE,
+                                    double t_ratioOfNanChargeBalance, double t_ratioOfNanCharge) {
+    m_ratio_of_nan_max_pe = t_ratioOfNanMaxPE;
+    m_ratio_of_nan_pe = t_ratioOfNanPE;
+    m_ratio_of_nan_charge_balance = t_ratioOfNanChargeBalance;
+    m_ratio_of_nan_charge = t_ratioOfNanCharge;
+}
+
 
