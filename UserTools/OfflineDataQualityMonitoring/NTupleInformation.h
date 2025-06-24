@@ -29,6 +29,8 @@ public:
     void setTankInformation(std::map<int, TankInformation> t_tankInformation);
     void setMRDInformation(std::map<int, MRDInformation> t_mrdInformation);
     void setGlobalClusterNumber(int t_globalNumberOfClusters);
+    void setGlobalMRDTrackNumber(int t_globalNumberMRDTracks){m_global_number_of_mrd_tracks = t_globalNumberMRDTracks;}
+    void setGlobalNumberOfEvents(int t_globalNumberOfEvents){m_global_number_of_events = t_globalNumberOfEvents;}
     int getGlobalClusterNumber() const {
         return m_global_number_of_clusters;
     }
@@ -50,6 +52,14 @@ public:
         m_tree_maker_version = t_treeMakerVersion;
     }
 
+    int getGlobalNumberOfMRDTracks() const{
+        return m_global_number_of_mrd_tracks;
+    }
+
+    int getGlobalNumberOfEvents() const{
+        return m_global_number_of_events;
+    }
+
 private:
     // Map that holds all of the tank information with the event number as the key and a struct as value
     std::map<int, TankInformation> m_tank_information { };
@@ -59,6 +69,8 @@ private:
     int m_run_number { };
     int m_global_number_of_clusters { };
     TreeMakerVersion m_tree_maker_version { };
+    int m_global_number_of_mrd_tracks { };
+    int m_global_number_of_events { };
 };
 
 #endif /* INCLUDE_NTUPLEINFORMATION_HH_ */

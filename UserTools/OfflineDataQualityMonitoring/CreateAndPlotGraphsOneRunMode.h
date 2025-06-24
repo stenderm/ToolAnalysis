@@ -30,8 +30,11 @@ private:
     std::vector<CanvasAndGraph> m_canvases_and_graphs_tank;
     std::vector<CanvasAndGraph> m_canvases_and_graphs_mrd;
     std::vector<CanvasAndGraph> m_canvases_and_graphs_mrd_channels;
+    std::vector<CanvasAndGraph> m_canvases_and_graphs_tank_channels;
+
     void matchFillValueToGraph(const CanvasAndGraph &t_graph,
                                const std::unique_ptr<RunMetrics> &t_runMetrics);
+    void matchFillValueToGraphTankChannels(const CanvasAndGraph &t_graph, const std::unique_ptr<RunMetrics> &t_runMetrics);
     void matchFillValueToGraphMRD(const CanvasAndGraph &t_graph,
                                   const std::unique_ptr<RunMetrics> &t_runMetrics);
     void matchFillValueToGraphMRDChannels(const CanvasAndGraph &t_graph, const std::unique_ptr<RunMetrics> &t_runMetrics);

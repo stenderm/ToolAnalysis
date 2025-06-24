@@ -19,113 +19,70 @@ CreateAndPlotGraphsOneRunMode::CreateAndPlotGraphsOneRunMode() {
     //ToDo: Automate the title and name generation
     //For name just put the axis titles together and get rid of the spaces
 
-    m_canvases_and_graphs_tank.push_back(
-            CanvasAndGraph(regularXAxis, "Number of Clusters", subSystemIdentifier, width, height));
-    m_canvases_and_graphs_tank.push_back(
-            CanvasAndGraph(regularXAxis, "Charge per Cluster", subSystemIdentifier, width, height));
-    m_canvases_and_graphs_tank.push_back(
-            CanvasAndGraph(regularXAxis, "Charge per Event", subSystemIdentifier, width, height));
-    m_canvases_and_graphs_tank.push_back(
-            CanvasAndGraph(regularXAxis, "Number of Events", subSystemIdentifier, width, height));
-    m_canvases_and_graphs_tank.push_back(
-            CanvasAndGraph(regularXAxis, "Mean Charge per Event", subSystemIdentifier, width,
-                    height));
-    m_canvases_and_graphs_tank.push_back(
-            CanvasAndGraph(regularXAxis, "Charge per Cluster in PE", subSystemIdentifier, width,
-                    height));
-    m_canvases_and_graphs_tank.push_back(
-            CanvasAndGraph(regularXAxis, "Charge per Event in PE", subSystemIdentifier, width,
-                    height));
-    m_canvases_and_graphs_tank.push_back(
-            CanvasAndGraph(regularXAxis, "Mean Charge per Event in PE", subSystemIdentifier, width,
-                    height));
-    m_canvases_and_graphs_tank.push_back(
-            CanvasAndGraph(regularXAxis, "Max Charge per Cluster in PE", subSystemIdentifier, width,
-                    height));
-    m_canvases_and_graphs_tank.push_back(
-            CanvasAndGraph(regularXAxis, "Charge Balance per Cluster", subSystemIdentifier, width,
-                    height));
-    m_canvases_and_graphs_tank.push_back(
-            CanvasAndGraph(regularXAxis, "Time per Cluster in ns", subSystemIdentifier, width,
-                    height));
-    m_canvases_and_graphs_tank.push_back(
-            CanvasAndGraph(regularXAxis, "Mean Time per Event in ns", subSystemIdentifier, width,
-                    height));
-    m_canvases_and_graphs_tank.push_back(
-            CanvasAndGraph(regularXAxis, "Number Of Clusters with Max PE of Inf",
-                    subSystemIdentifier, width, height));
-    m_canvases_and_graphs_tank.push_back(
-            CanvasAndGraph(regularXAxis, "Number Of Clusters with PE of Inf", subSystemIdentifier,
-                    width, height));
-    m_canvases_and_graphs_tank.push_back(
-            CanvasAndGraph(regularXAxis, "Number Of Clusters with Charge Balance of Inf",
-                    subSystemIdentifier, width, height));
-    m_canvases_and_graphs_tank.push_back(
-            CanvasAndGraph(regularXAxis, "Number Of Clusters with Charge of Inf",
-                    subSystemIdentifier, width, height));
-    m_canvases_and_graphs_tank.push_back(
-            CanvasAndGraph(regularXAxis, "Ratio Of Clusters with Max PE of Inf",
-                    subSystemIdentifier, width, height));
-    m_canvases_and_graphs_tank.push_back(
-            CanvasAndGraph(regularXAxis, "Ratio Of Clusters with PE of Inf", subSystemIdentifier,
-                    width, height));
-    m_canvases_and_graphs_tank.push_back(
-            CanvasAndGraph(regularXAxis, "Ratio Of Clusters with Charge Balance of Inf",
-                    subSystemIdentifier, width, height));
-    m_canvases_and_graphs_tank.push_back(
-            CanvasAndGraph(regularXAxis, "Ratio Of Clusters with Charge of Inf",
-                    subSystemIdentifier, width, height));
-    m_canvases_and_graphs_tank.push_back(
-            CanvasAndGraph(regularXAxis, "Number Of Clusters with Max PE of Nan",
-                    subSystemIdentifier, width, height));
-    m_canvases_and_graphs_tank.push_back(
-            CanvasAndGraph(regularXAxis, "Number Of Clusters with PE of Nan", subSystemIdentifier,
-                    width, height));
-    m_canvases_and_graphs_tank.push_back(
-            CanvasAndGraph(regularXAxis, "Number Of Clusters with Charge Balance of Nan",
-                    subSystemIdentifier, width, height));
-    m_canvases_and_graphs_tank.push_back(
-            CanvasAndGraph(regularXAxis, "Number Of Clusters with Charge of Nan",
-                    subSystemIdentifier, width, height));
-    m_canvases_and_graphs_tank.push_back(
-            CanvasAndGraph(regularXAxis, "Ratio Of Clusters with Max PE of Nan",
-                    subSystemIdentifier, width, height));
-    m_canvases_and_graphs_tank.push_back(
-            CanvasAndGraph(regularXAxis, "Ratio Of Clusters with PE of Nan", subSystemIdentifier,
-                    width, height));
-    m_canvases_and_graphs_tank.push_back(
-            CanvasAndGraph(regularXAxis, "Ratio Of Clusters with Charge Balance of Nan",
-                    subSystemIdentifier, width, height));
-    m_canvases_and_graphs_tank.push_back(
-            CanvasAndGraph(regularXAxis, "Ratio Of Clusters with Charge of Nan",
-                    subSystemIdentifier, width, height));
+    m_canvases_and_graphs_tank.push_back(CanvasAndGraph(regularXAxis, "Number of Clusters", subSystemIdentifier, width, height));
+    m_canvases_and_graphs_tank.push_back(CanvasAndGraph(regularXAxis, "Charge per Cluster", subSystemIdentifier, width, height));
+    m_canvases_and_graphs_tank.push_back(CanvasAndGraph(regularXAxis, "Charge per Event", subSystemIdentifier, width, height));
+    m_canvases_and_graphs_tank.push_back(CanvasAndGraph(regularXAxis, "Number of Events", subSystemIdentifier, width, height));
+    m_canvases_and_graphs_tank.push_back(CanvasAndGraph(regularXAxis, "Mean Charge per Event", subSystemIdentifier, width, height));
+    m_canvases_and_graphs_tank.push_back(CanvasAndGraph(regularXAxis, "Charge per Cluster in PE", subSystemIdentifier, width, height));
+    m_canvases_and_graphs_tank.push_back(CanvasAndGraph(regularXAxis, "Charge per Event in PE", subSystemIdentifier, width, height));
+    m_canvases_and_graphs_tank.push_back(CanvasAndGraph(regularXAxis, "Mean Charge per Event in PE", subSystemIdentifier, width, height));
+    m_canvases_and_graphs_tank.push_back(CanvasAndGraph(regularXAxis, "Max Charge per Cluster in PE", subSystemIdentifier, width, height));
+    m_canvases_and_graphs_tank.push_back(CanvasAndGraph(regularXAxis, "Charge Balance per Cluster", subSystemIdentifier, width, height));
+    m_canvases_and_graphs_tank.push_back(CanvasAndGraph(regularXAxis, "Time per Cluster in ns", subSystemIdentifier, width, height));
+    m_canvases_and_graphs_tank.push_back(CanvasAndGraph(regularXAxis, "Mean Time per Event in ns", subSystemIdentifier, width, height));
+    m_canvases_and_graphs_tank.push_back(CanvasAndGraph(regularXAxis, "Number Of Clusters with Max PE of Inf", subSystemIdentifier, width, height));
+    m_canvases_and_graphs_tank.push_back(CanvasAndGraph(regularXAxis, "Number Of Clusters with PE of Inf", subSystemIdentifier, width, height));
+    m_canvases_and_graphs_tank.push_back(CanvasAndGraph(regularXAxis, "Number Of Clusters with Charge Balance of Inf", subSystemIdentifier, width, height));
+    m_canvases_and_graphs_tank.push_back(CanvasAndGraph(regularXAxis, "Number Of Clusters with Charge of Inf", subSystemIdentifier, width, height));
+    m_canvases_and_graphs_tank.push_back(CanvasAndGraph(regularXAxis, "Ratio Of Clusters with Max PE of Inf", subSystemIdentifier, width, height));
+    m_canvases_and_graphs_tank.push_back(CanvasAndGraph(regularXAxis, "Ratio Of Clusters with PE of Inf", subSystemIdentifier, width, height));
+    m_canvases_and_graphs_tank.push_back(CanvasAndGraph(regularXAxis, "Ratio Of Clusters with Charge Balance of Inf", subSystemIdentifier, width, height));
+    m_canvases_and_graphs_tank.push_back(CanvasAndGraph(regularXAxis, "Ratio Of Clusters with Charge of Inf", subSystemIdentifier, width, height));
+    m_canvases_and_graphs_tank.push_back(CanvasAndGraph(regularXAxis, "Number Of Clusters with Max PE of Nan", subSystemIdentifier, width, height));
+    m_canvases_and_graphs_tank.push_back(CanvasAndGraph(regularXAxis, "Number Of Clusters with PE of Nan", subSystemIdentifier, width, height));
+    m_canvases_and_graphs_tank.push_back(CanvasAndGraph(regularXAxis, "Number Of Clusters with Charge Balance of Nan", subSystemIdentifier, width, height));
+    m_canvases_and_graphs_tank.push_back(CanvasAndGraph(regularXAxis, "Number Of Clusters with Charge of Nan", subSystemIdentifier, width, height));
+    m_canvases_and_graphs_tank.push_back(CanvasAndGraph(regularXAxis, "Ratio Of Clusters with Max PE of Nan", subSystemIdentifier, width, height));
+    m_canvases_and_graphs_tank.push_back(CanvasAndGraph(regularXAxis, "Ratio Of Clusters with PE of Nan", subSystemIdentifier, width, height));
+    m_canvases_and_graphs_tank.push_back(CanvasAndGraph(regularXAxis, "Ratio Of Clusters with Charge Balance of Nan", subSystemIdentifier, width, height));
+    m_canvases_and_graphs_tank.push_back(CanvasAndGraph(regularXAxis, "Ratio Of Clusters with Charge of Nan", subSystemIdentifier, width, height));
+    m_canvases_and_graphs_tank.push_back(CanvasAndGraph(regularXAxis, "Number Of Clusters with Charge Balance > 2.0", subSystemIdentifier, width, height));
+    m_canvases_and_graphs_tank.push_back(CanvasAndGraph(regularXAxis, "Number Of Clusters with Charge Balance > 10.0", subSystemIdentifier, width, height));
+    m_canvases_and_graphs_tank.push_back(CanvasAndGraph(regularXAxis, "Ratio Of Clusters with Charge Balance > 2.0", subSystemIdentifier, width, height));
+    m_canvases_and_graphs_tank.push_back(CanvasAndGraph(regularXAxis, "Ratio Of Clusters with Charge Balance > 10.0", subSystemIdentifier, width, height));
+
+    int startNumberTankTubes = 330;
+    int endNumberTankTubes = 470;
+    int numberOfDifferentGraphs = 3;
+    m_canvases_and_graphs_tank_channels.reserve(numberOfDifferentGraphs * (endNumberTankTubes - startNumberTankTubes));
+    for (int iID = startNumberTankTubes; iID < endNumberTankTubes; iID++) {
+        std::string title = "Charge per Event for ID " + std::to_string(iID);
+        m_canvases_and_graphs_tank_channels.push_back(CanvasAndGraph(regularXAxis, title, subSystemIdentifier, width, height));
+        title = "Charge PE per Event for ID " + std::to_string(iID);
+        m_canvases_and_graphs_tank_channels.push_back(CanvasAndGraph(regularXAxis, title, subSystemIdentifier, width, height));
+        title = "Hits per Event for ID " + std::to_string(iID);
+        m_canvases_and_graphs_tank_channels.push_back(CanvasAndGraph(regularXAxis, title, subSystemIdentifier, width, height));
+    }
 
     subSystemIdentifier = "MRD";
-    m_canvases_and_graphs_mrd.push_back(
-            CanvasAndGraph(regularXAxis, "Ratio Signal Hits to All Hits", subSystemIdentifier,
-                    width, height));
-    m_canvases_and_graphs_mrd.push_back(
-            CanvasAndGraph(regularXAxis, "Ratio Late Hits to All Hits", subSystemIdentifier, width,
-                    height));
-    m_canvases_and_graphs_mrd.push_back(
-            CanvasAndGraph(regularXAxis, "Ratio Signal Clusters to All Clusters",
-                    subSystemIdentifier, width, height));
-    m_canvases_and_graphs_mrd.push_back(
-            CanvasAndGraph(regularXAxis, "Ratio Late Clusters to All Clusters", subSystemIdentifier,
-                    width, height));
-    m_canvases_and_graphs_mrd.push_back(
-            CanvasAndGraph(regularXAxis, "Number of Clusters per Event", subSystemIdentifier, width,
-                    height));
-    m_canvases_and_graphs_mrd.push_back(
-            CanvasAndGraph(regularXAxis, "Number of Hits per Event", subSystemIdentifier, width,
-                    height));
-    //ToDo: Get this number from the highest number of IDs
+    m_canvases_and_graphs_mrd.push_back(CanvasAndGraph(regularXAxis, "Ratio Signal Hits to All Hits", subSystemIdentifier, width, height));
+    m_canvases_and_graphs_mrd.push_back(CanvasAndGraph(regularXAxis, "Ratio Late Hits to All Hits", subSystemIdentifier, width, height));
+    m_canvases_and_graphs_mrd.push_back(CanvasAndGraph(regularXAxis, "Ratio Signal Clusters to All Clusters", subSystemIdentifier, width, height));
+    m_canvases_and_graphs_mrd.push_back(CanvasAndGraph(regularXAxis, "Ratio Late Clusters to All Clusters", subSystemIdentifier, width, height));
+    m_canvases_and_graphs_mrd.push_back(CanvasAndGraph(regularXAxis, "Number of Clusters per Event", subSystemIdentifier, width, height));
+    m_canvases_and_graphs_mrd.push_back(CanvasAndGraph(regularXAxis, "Number of Hits per Event", subSystemIdentifier, width, height));
+    m_canvases_and_graphs_mrd.push_back(CanvasAndGraph(regularXAxis, "Number of Tracks per Event", subSystemIdentifier, width, height));
+    m_canvases_and_graphs_mrd.push_back(CanvasAndGraph(regularXAxis, "Number of Tracks per Cluster", subSystemIdentifier, width, height));
+
+    //ToDo: Get this number from the highest number of IDs; for the PMT tubes as well
     int numberOfMaxID = 350;
+    m_canvases_and_graphs_mrd_channels.reserve(numberOfMaxID);
     for (int iID = 0; iID < numberOfMaxID; iID++) {
         std::string title = "Hits per Event for ID " + std::to_string(iID);
-        m_canvases_and_graphs_mrd_channels.push_back(
-                CanvasAndGraph(regularXAxis, title, subSystemIdentifier, width, height));
+        m_canvases_and_graphs_mrd_channels.push_back(CanvasAndGraph(regularXAxis, title, subSystemIdentifier, width, height));
     }
+
 }
 
 CreateAndPlotGraphsOneRunMode::~CreateAndPlotGraphsOneRunMode() {
@@ -143,13 +100,14 @@ void CreateAndPlotGraphsOneRunMode::setMRDMetrics(const std::unique_ptr<RunMetri
     }
 }
 
-void CreateAndPlotGraphsOneRunMode::matchFillValueToGraphMRDChannels(
-        const CanvasAndGraph &t_graph, const std::unique_ptr<RunMetrics> &t_runMetrics) {
+void CreateAndPlotGraphsOneRunMode::matchFillValueToGraphMRDChannels(const CanvasAndGraph &t_graph, const std::unique_ptr<RunMetrics> &t_runMetrics) {
     double errorToFill { 0.0 };
     double pointToFill { 0.0 };
+    bool isToFill { false };
     for (const auto &IdValuePair : t_runMetrics->getHitsPerEventPerChannel()) {
         std::string title = "Hits per Event for ID " + std::to_string(IdValuePair.first);
         if (t_graph.yAxisTitle == title) {
+            isToFill = true;
             pointToFill = IdValuePair.second;
             errorToFill = pointToFill / 100.0;
         }
@@ -161,14 +119,14 @@ void CreateAndPlotGraphsOneRunMode::matchFillValueToGraphMRDChannels(
     if (m_draw_horizontal_error) {
         horizontalError = 0.25;
     }
-
-    t_graph.graph->AddPoint(t_runMetrics->getRunNumber(), pointToFill);
-    t_graph.graph->SetPointError(t_graph.graph->GetN() - 1, horizontalError, errorToFill);
+    if (isToFill) {
+        t_graph.graph->AddPoint(t_runMetrics->getRunNumber(), pointToFill);
+        t_graph.graph->SetPointError(t_graph.graph->GetN() - 1, horizontalError, errorToFill);
+    }
 
 }
 
-void CreateAndPlotGraphsOneRunMode::matchFillValueToGraphMRD(
-        const CanvasAndGraph &t_graph, const std::unique_ptr<RunMetrics> &t_runMetrics) {
+void CreateAndPlotGraphsOneRunMode::matchFillValueToGraphMRD(const CanvasAndGraph &t_graph, const std::unique_ptr<RunMetrics> &t_runMetrics) {
     double errorToFill { 0.0 };
     double pointToFill { 0.0 };
 
@@ -186,15 +144,15 @@ void CreateAndPlotGraphsOneRunMode::matchFillValueToGraphMRD(
         errorToFill = pointToFill / 100.0;
     } else if (t_graph.yAxisTitle == "Number of Clusters per Event") {
         pointToFill = t_runMetrics->getClustersPerEvent();
-        if (pointToFill) {
-            std::cout << "Cluster per Event " << pointToFill << std::endl;
-        }
         errorToFill = pointToFill / 100.0;
     } else if (t_graph.yAxisTitle == "Number of Hits per Event") {
         pointToFill = t_runMetrics->getHitsPerEvent();
-        if (pointToFill) {
-            std::cout << "Hits per Event " << pointToFill << std::endl;
-        }
+        errorToFill = pointToFill / 100.0;
+    } else if (t_graph.yAxisTitle == "Number of Tracks per Event") {
+        pointToFill = t_runMetrics->getTracksPerEvent();
+        errorToFill = pointToFill / 100.0;
+    } else if (t_graph.yAxisTitle == "Number of Tracks per Cluster") {
+        pointToFill = t_runMetrics->getTracksPerCluster();
         errorToFill = pointToFill / 100.0;
     }
     if (!m_draw_error) {
@@ -215,11 +173,52 @@ void CreateAndPlotGraphsOneRunMode::setTankCharge(const std::unique_ptr<RunMetri
         //ToDo: Function to sort the to fill variable to the corresponding graph container
         matchFillValueToGraph(oneGraph, t_runMetrics);
     }
+
+    for (const CanvasAndGraph &oneGraphChannels : m_canvases_and_graphs_tank_channels) {
+        matchFillValueToGraphTankChannels(oneGraphChannels, t_runMetrics);
+    }
+
+}
+
+void CreateAndPlotGraphsOneRunMode::matchFillValueToGraphTankChannels(const CanvasAndGraph &t_graph, const std::unique_ptr<RunMetrics> &t_runMetrics) {
+    double errorToFill { 0.0 };
+    double pointToFill { 0.0 };
+    bool isToFill { false };
+    for (const auto &IdValuePair : t_runMetrics->getMeanHitsPerEventPerChannelTank()) {
+        std::string title = "Charge per Event for ID " + std::to_string(IdValuePair.first);
+        if (t_graph.yAxisTitle == title) {
+            isToFill = true;
+            pointToFill = t_runMetrics->getMeanChargePerEventPerChannelTank(IdValuePair.first);
+            errorToFill = t_runMetrics->getStdChargePerEventPerChannelTank(IdValuePair.first);
+        }
+        title = "Charge PE per Event for ID " + std::to_string(IdValuePair.first);
+        if (t_graph.yAxisTitle == title) {
+            isToFill = true;
+            pointToFill = t_runMetrics->getMeanChargePePerEventPerChannelTank(IdValuePair.first);
+            errorToFill = t_runMetrics->getStdChargePePerEventPerChannelTank(IdValuePair.first);
+        }
+        title = "Hits per Event for ID " + std::to_string(IdValuePair.first);
+        if (t_graph.yAxisTitle == title) {
+            isToFill = true;
+            pointToFill = t_runMetrics->getMeanHitsPerEventPerChannelTank(IdValuePair.first);
+            errorToFill = t_runMetrics->getStdHitsPerEventPerChannelTank(IdValuePair.first);
+        }
+    }
+    double horizontalError = 0.0;
+    if (m_draw_horizontal_error) {
+        horizontalError = 0.25;
+    }
+    if (!m_draw_error) {
+        errorToFill = 0.0;
+    }
+    if (isToFill) {
+        t_graph.graph->AddPoint(t_runMetrics->getRunNumber(), pointToFill);
+        t_graph.graph->SetPointError(t_graph.graph->GetN() - 1, horizontalError, errorToFill);
+    }
 }
 
 //ToDo: Currently everything expects to be in terms of run number; add other cases?
-void CreateAndPlotGraphsOneRunMode::matchFillValueToGraph(
-        const CanvasAndGraph &t_graph, const std::unique_ptr<RunMetrics> &t_runMetrics) {
+void CreateAndPlotGraphsOneRunMode::matchFillValueToGraph(const CanvasAndGraph &t_graph, const std::unique_ptr<RunMetrics> &t_runMetrics) {
     double errorToFill { 0.0 };
     double pointToFill { 0.0 };
 
@@ -244,8 +243,7 @@ void CreateAndPlotGraphsOneRunMode::matchFillValueToGraph(
         errorToFill = t_runMetrics->getStdChargePerClusterPE();
     } else if (t_graph.yAxisTitle == "Charge per Event in PE") {
         pointToFill = t_runMetrics->getMeanChargePerEventPE();
-        std::cout << t_runMetrics->getRunNumber() << " Mean Charge per Event " << pointToFill
-                << "\n";
+        std::cout << t_runMetrics->getRunNumber() << " Mean Charge per Event " << pointToFill << "\n";
         errorToFill = t_runMetrics->getStdChargePerEventPE();
     } else if (t_graph.yAxisTitle == "Mean Charge per Event in PE") {
         pointToFill = t_runMetrics->getMeanMeanChargePerEventPE();
@@ -310,6 +308,18 @@ void CreateAndPlotGraphsOneRunMode::matchFillValueToGraph(
     } else if (t_graph.yAxisTitle == "Ratio Of Clusters with Charge of Nan") {
         pointToFill = t_runMetrics->getRatioOfNanCharge();
         errorToFill = 0.0;
+    } else if (t_graph.yAxisTitle == "Number Of Clusters with Charge Balance > 2.0") {
+        pointToFill = t_runMetrics->getNumberOfChargeBalancesAboveTwo();
+        errorToFill = 0.0;
+    } else if (t_graph.yAxisTitle == "Number Of Clusters with Charge Balance > 10.0") {
+        pointToFill = t_runMetrics->getNumberOfChargeBalancesAboveTen();
+        errorToFill = 0.0;
+    } else if (t_graph.yAxisTitle == "Ratio Of Clusters with Charge Balance > 2.0") {
+        pointToFill = t_runMetrics->getRatioOfChargeBalancesAboveTwo();
+        errorToFill = 0.0;
+    } else if (t_graph.yAxisTitle == "Ratio Of Clusters with Charge Balance > 10.0") {
+        pointToFill = t_runMetrics->getRatioOfChargeBalancesAboveTen();
+        errorToFill = 0.0;
     }
 
     double horizontalError = 0.0;
@@ -320,36 +330,35 @@ void CreateAndPlotGraphsOneRunMode::matchFillValueToGraph(
     t_graph.graph->SetPointError(t_graph.graph->GetN() - 1, horizontalError, errorToFill);
 
 }
-
-void CreateAndPlotGraphsOneRunMode::drawAndSavePerSubsystem(
-        bool t_saveHistogramsAsPictures, const std::string &t_saveDirectory,
-        const std::string &t_fileName, bool t_saveAsRoot,
-        const std::vector<CanvasAndGraph> &t_canvasAndGraphs) {
+// ToDo: For individual channels only safe the canvases with actual contents in them
+void CreateAndPlotGraphsOneRunMode::drawAndSavePerSubsystem(bool t_saveHistogramsAsPictures, const std::string &t_saveDirectory, const std::string &t_fileName, bool t_saveAsRoot,
+                                                            const std::vector<CanvasAndGraph> &t_canvasAndGraphs) {
     std::unique_ptr<TFile> outputROOTFile;
     if (t_saveAsRoot) {
         outputROOTFile = std::make_unique < TFile > (t_fileName.c_str(), "RECREATE");
         if (!outputROOTFile->IsOpen()) {
-            std::cout << "Output file " << t_fileName
-                    << " couldn't be opened. Pictures are not saved!\n";
+            std::cout << "Output file " << t_fileName << " couldn't be opened. Pictures are not saved!\n";
             outputROOTFile->Close();
             return;
         }
     }
     // loop over all histogram containers
     for (size_t iGraph { 0 }; iGraph < t_canvasAndGraphs.size(); iGraph++) {
+        if (!t_canvasAndGraphs.at(iGraph).graph->GetN()) {
+            continue;
+        }
         // set to the correct canvasS
         t_canvasAndGraphs.at(iGraph).canvas->cd();
         //draw
         t_canvasAndGraphs.at(iGraph).graph->Draw("AP");
+
         if (t_saveAsRoot and outputROOTFile) {
             outputROOTFile->cd();
-            t_canvasAndGraphs.at(iGraph).canvas->Write(
-                    t_canvasAndGraphs.at(iGraph).canvas->GetName());
+            t_canvasAndGraphs.at(iGraph).canvas->Write(t_canvasAndGraphs.at(iGraph).canvas->GetName());
         }
         // save histograms as pictures if specified
         if (t_saveHistogramsAsPictures) {
-            std::string saveFileName = t_saveDirectory
-                    + std::string(t_canvasAndGraphs.at(iGraph).canvas->GetName()) + ".pdf";
+            std::string saveFileName = t_saveDirectory + std::string(t_canvasAndGraphs.at(iGraph).canvas->GetName()) + ".pdf";
             t_canvasAndGraphs.at(iGraph).canvas->Print(saveFileName.c_str());
         }
     }
@@ -359,20 +368,13 @@ void CreateAndPlotGraphsOneRunMode::drawAndSavePerSubsystem(
     }
 }
 
-void CreateAndPlotGraphsOneRunMode::drawAndSave(bool t_saveHistogramsAsPictures,
-                                                const std::string &t_saveDirectory,
-                                                const std::string &t_fileName, bool t_saveAsRoot) {
+void CreateAndPlotGraphsOneRunMode::drawAndSave(bool t_saveHistogramsAsPictures, const std::string &t_saveDirectory, const std::string &t_fileName, bool t_saveAsRoot) {
 
-    drawAndSavePerSubsystem(t_saveHistogramsAsPictures, t_saveDirectory + "TankMetrics/",
-            t_saveDirectory + "TankMetrics/TankMetrics.root", t_saveAsRoot,
-            m_canvases_and_graphs_tank);
+    drawAndSavePerSubsystem(t_saveHistogramsAsPictures, t_saveDirectory + "TankMetrics/", t_saveDirectory + "TankMetrics/TankMetrics.root", t_saveAsRoot, m_canvases_and_graphs_tank);
 
-    drawAndSavePerSubsystem(t_saveHistogramsAsPictures, t_saveDirectory + "MRDMetrics/",
-            t_saveDirectory + "MRDMetrics/MRDMetrics.root", t_saveAsRoot,
-            m_canvases_and_graphs_mrd);
+    drawAndSavePerSubsystem(t_saveHistogramsAsPictures, t_saveDirectory + "MRDMetrics/", t_saveDirectory + "MRDMetrics/MRDMetrics.root", t_saveAsRoot, m_canvases_and_graphs_mrd);
 
-    drawAndSavePerSubsystem(t_saveHistogramsAsPictures, t_saveDirectory + "MRDChannels/",
-            t_saveDirectory + "MRDChannels/MRDChannels.root", t_saveAsRoot,
-            m_canvases_and_graphs_mrd_channels);
+    drawAndSavePerSubsystem(t_saveHistogramsAsPictures, t_saveDirectory + "MRDChannels/", t_saveDirectory + "MRDChannels/MRDChannels.root", t_saveAsRoot, m_canvases_and_graphs_mrd_channels);
 
+    drawAndSavePerSubsystem(t_saveHistogramsAsPictures, t_saveDirectory + "TankChannels/", t_saveDirectory + "TankChannels/TankChannels.root", t_saveAsRoot, m_canvases_and_graphs_tank_channels);
 }

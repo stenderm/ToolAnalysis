@@ -78,7 +78,7 @@ void RunMetrics::setMRDMetrics(double t_hitsInWindowVsAllHits, double t_lateHits
                                double t_clustersPerEvent, double t_HitsPerEvent,
                                std::map<int, double> t_hitsPerEventPerChannel,
                                double t_clustersInWindowVsAllClusters,
-                               double t_lateClustersVsAllClusters) {
+                               double t_lateClustersVsAllClusters, double t_tracksPerEvent, double t_tracksPerCluster) {
     m_hits_in_signal_window_vs_all_hits = t_hitsInWindowVsAllHits;
     m_late_hits_vs_all_hits = t_lateHitsVsAllHits;
     m_clusters_per_event = t_clustersPerEvent;
@@ -86,6 +86,8 @@ void RunMetrics::setMRDMetrics(double t_hitsInWindowVsAllHits, double t_lateHits
     m_hits_per_event_per_channel = t_hitsPerEventPerChannel;
     m_clusters_in_signal_window_vs_all_clusters = t_clustersInWindowVsAllClusters;
     m_late_clusters_vs_all_clusters = t_lateClustersVsAllClusters;
+    m_tracks_per_event = t_tracksPerEvent;
+    m_tracks_per_cluster = t_tracksPerCluster;
 }
 
 void RunMetrics::printTankCharge() {
@@ -100,7 +102,12 @@ void RunMetrics::printTankCharge() {
     std::cout << "MeanClusterBalance " << m_mean_charge_balance_per_cluster << "+- "
             << m_std_charge_balance_per_cluster << "\n";
     std::cout << "Number of Clusters with Charge Balance Anomaly "
-            << m_number_of_charge_balance_anomalies << "\n";
+            << m_number_of_charge_balances_above_two << "\n";
+    std::cout << "Ratio of Charge Balances Above Two "
+           << m_ratio_of_charge_balances_above_two << "\n";
+    std::cout << "Ratio of Charge Balances Above Ten "
+           << m_ratio_of_charge_balances_above_ten << "\n";
+
 }
 
 void RunMetrics::setInfChargeNumbers(int t_numberOfInfMaxPE, int t_numberOfInfPE,
@@ -134,5 +141,17 @@ void RunMetrics::setNanChargeRatios(double t_ratioOfNanMaxPE, double t_ratioOfNa
     m_ratio_of_nan_charge_balance = t_ratioOfNanChargeBalance;
     m_ratio_of_nan_charge = t_ratioOfNanCharge;
 }
+
+void RunMetrics::setTankTubeValues(int t_tubeID, double t_meanNumberOfHitsPerEvent, double t_stdNumberOfHitsPerEvent,
+                                   double t_meanChargePerEvent, double t_stdChargePerEvent,
+                                   double t_meanChargePEPerEvent, double t_stdChargePEPerEvent){
+    m_mean_hits_per_event_per_channel_tank[t_tubeID] = t_meanNumberOfHitsPerEvent;
+    m_std_hits_per_event_per_channel_tank[t_tubeID] = t_stdNumberOfHitsPerEvent;
+    m_mean_charge_per_event_per_channel_tank[t_tubeID] = t_meanChargePerEvent;
+    m_std_charge_per_event_per_channel_tank[t_tubeID] = t_stdChargePerEvent;
+    m_mean_charge_pe_per_event_per_channel_tank[t_tubeID] = t_meanChargePEPerEvent;
+    m_std_charge_pe_per_event_per_channel_tank[t_tubeID] = t_stdChargePEPerEvent;
+}
+
 
 

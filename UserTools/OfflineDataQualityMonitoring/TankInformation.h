@@ -12,6 +12,10 @@ struct TankInformation{
     std::vector<double> clusterCharge;
     std::vector<double> clusterTime;
     std::vector<double> clusterChargeBalance;
+
+    // for the individual tubes
+    //   map<Tube ID, vector<      tuple<Time, Charge, Charge in PE> > >
+    std::map<int, std::vector<std::tuple<double, double, double> > > hitsPerTube;
 };
 
 #endif /* INCLUDE_TANKINFORMATION_HH_ */

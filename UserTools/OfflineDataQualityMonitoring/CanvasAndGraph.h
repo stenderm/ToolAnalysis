@@ -7,6 +7,7 @@
 #include <algorithm>
 #include <iostream>
 #include <boost/algorithm/string.hpp>
+#include "TAxis.h"
 //ToDo: Add a run modifier, that can be used to change the color and to fill the right information.
 struct CanvasAndGraph{
     std::unique_ptr<TCanvas> canvas { };
@@ -28,6 +29,7 @@ struct CanvasAndGraph{
         graph->SetTitle(graphTitle.c_str());
         std::string yAxisStripped = t_yAxisTitle;
         std::string xAxisStripped = t_xAxisTitle;
+        graph->GetYaxis()->SetTitleOffset(1.5);
         removeSpaces(yAxisStripped);
         removeSpaces(xAxisStripped);
         std::string canvasName { yAxisStripped + "Per" + xAxisStripped + "In" + t_subsystemIdentifier};

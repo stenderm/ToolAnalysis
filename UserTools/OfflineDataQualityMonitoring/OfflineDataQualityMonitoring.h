@@ -10,11 +10,11 @@
 /**
  * \class OfflineDataQualityMonitoring
  *
- * This is a blank template for a Tool used by the script to generate a new custom tool. Please fill out the description and author information.
+ * This tool extracts data quality metrics from ntuples and produces data quality monitoring plots.
  *
- * $Author: B.Richards $
- * $Date: 2019/05/28 10:44:00 $
- * Contact: b.richards@qmul.ac.uk
+ * $Author: M. Stender $
+ * $Date: 2025/05.05. $
+ * Contact: malte.stender@desy.de
  */
 class OfflineDataQualityMonitoring: public Tool {
 
@@ -60,10 +60,8 @@ private:
     // Name of output root file
     std::string m_config_root_file_name { };
 
-
-    // vector of available run modes, that is filled in constructor
-    std::vector<std::string> m_run_modes { };
-
+    /// Methods
+    // load and check the configuration variables provided in "/ToolAnalysis/configfiles/OfflineDataQualityMonitoring/OfflineDataQualityMonitoringConfig"
     void loadAndCheckConfiguration(const std::string& t_configfileName);
     // checks validity of configuration variables, exceptions are thrown in the individual methods if parameter is invalid
     void checkConfigurationVariables();
@@ -77,10 +75,14 @@ private:
     void checkAndAdjustVerbosity();
     // checks the validity of the save paths and modes
     void checkSaveConfig() const;
-
+    // Loads the list file in the "old" style (PhaseIITreeMaker)
     std::vector<std::tuple<int, RunMode, std::vector<std::string> > > loadListFileOld();
-
+    // Loads the list file in the "new" style (ANNIEEventTreeMaker)
     std::vector<std::tuple<int, RunMode, std::vector<std::string> > > loadListFileNew();
+
+    /// Internal variables
+    // vector of available run modes, that is filled in constructor
+    std::vector<std::string> m_run_modes { };
 };
 
 #endif

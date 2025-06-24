@@ -28,6 +28,7 @@ void CalculateMetrics::calculateTankCharge(
 
     int numberToReserve = t_ntupleInformationOneRun->getGlobalClusterNumber();
 
+    int numberOfEvents = t_ntupleInformationOneRun->getGlobalNumberOfEvents();
     //int runNumber = t_ntupleInformationOneRun->getRunNumber();
     std::vector<int> numberOfClusterPerEvent { };
     std::vector<double> chargePerCluster { };
@@ -44,6 +45,11 @@ void CalculateMetrics::calculateTankCharge(
     std::vector<double> timePerClusters { };
     std::vector<double> meanClusterTime { };
 
+    std::map<int, std::vector<double> > chargePerTube {};
+    std::map<int, std::vector<double> > chargePEPerTube {};
+    std::map<int, std::vector<double> > hitsPerTube {};
+
+
     numberOfClusterPerEvent.reserve(numberToReserve);
     chargePerCluster.reserve(numberToReserve);
     chargePerEventInClusters.reserve(numberToReserve);
@@ -59,7 +65,8 @@ void CalculateMetrics::calculateTankCharge(
     timePerClusters.reserve(numberToReserve);
     meanClusterTime.reserve(numberToReserve);
 
-    int numberOfClustersWithChargeBalanceOverOne { 0 };
+    int numberOfClustersWithChargeBalanceOverTwo { 0 };
+    int numberOfClustersWithChargeBalanceOverTen { 0 };
 
     int numberOfClusterWithMaxPEInf { 0 };
     int numberOfClusterWithPEInf { 0 };
@@ -74,6 +81,28 @@ void CalculateMetrics::calculateTankCharge(
     int numberOfClusters { 0 };
 
     for (const auto& [event, tankInformationOneEvent] : tankInformationOneRun) {
+
+        for(const auto& [tubeId, hitInformation] : tankInformationOneEvent.hitsPerTube){
+            if(!t_runMetrics->isKeyPresentInMap(chargePerTube, tubeId)){
+                chargePerTube[tubeId].reserve(numberOfEvents);
+                chargePEPerTube[tubeId].reserve(numberOfEvents);
+                hitsPerTube[tubeId].reserve(numberOfEvents);
+            }
+            double chargePerEvent { 0.0 };
+            double chargePEPerEvent { 0.0 };
+            int hitPerEvent { 0 };
+            for(int iHit = 0; iHit < hitInformation.size(); iHit++){
+                chargePerEvent =+ std::get<1>(hitInformation.at(iHit));
+                chargePEPerEvent =+ std::get<2>(hitInformation.at(iHit));
+                hitPerEvent =+ 1;
+            }
+            chargePerTube[tubeId].push_back(chargePerEvent);
+            chargePEPerTube[tubeId].push_back(chargePEPerEvent);
+            hitsPerTube[tubeId].push_back(hitPerEvent);
+        }
+
+
+
         double chargePerEvent { 0.0 };
         double chargerPerEventPE { 0.0 };
         double timePerEvent { 0.0 };
@@ -99,7 +128,10 @@ void CalculateMetrics::calculateTankCharge(
             }
 
             if (tankInformationOneEvent.clusterChargeBalance.at(iCluster) > 2.0) {
-                numberOfClustersWithChargeBalanceOverOne++;
+                numberOfClustersWithChargeBalanceOverTwo++;
+            }
+            if(tankInformationOneEvent.clusterChargeBalance.at(iCluster) > 10.0){
+                numberOfClustersWithChargeBalanceOverTen++;
             }
 
             if (std::isinf(tankInformationOneEvent.clusterChargeBalance.at(iCluster))) {
@@ -140,6 +172,23 @@ void CalculateMetrics::calculateTankCharge(
         numberOfClusterPerEvent.push_back(tankInformationOneEvent.numberOfClusters);
     }
 
+    // add zeros to the vector of tube charges and tube hits to account for all of the events, where they did not see a hit
+    for(const auto& [tubeId, hitCharge] : chargePerTube){
+        int numberOfEventsWithZeroHits = numberOfEvents - chargePerTube[tubeId].size();
+        chargePerTube[tubeId].insert(chargePerTube[tubeId].end(), numberOfEventsWithZeroHits, 0.0);
+        chargePEPerTube[tubeId].insert(chargePEPerTube[tubeId].end(), numberOfEventsWithZeroHits, 0.0);
+        hitsPerTube[tubeId].insert(hitsPerTube[tubeId].end(), numberOfEventsWithZeroHits, 0);
+        t_runMetrics->setTankTubeValues(tubeId,
+                TMath::Mean(chargePerTube[tubeId].begin(), chargePerTube[tubeId].end()),
+                TMath::StdDev(chargePerTube[tubeId].begin(), chargePerTube[tubeId].end()),
+                TMath::Mean(chargePEPerTube[tubeId].begin(), chargePEPerTube[tubeId].end()),
+                TMath::StdDev(chargePEPerTube[tubeId].begin(), chargePEPerTube[tubeId].end()),
+                TMath::Mean(hitsPerTube[tubeId].begin(), hitsPerTube[tubeId].end()),
+                TMath::StdDev(hitsPerTube[tubeId].begin(), hitsPerTube[tubeId].end()));
+    }
+
+
+
     t_runMetrics->setTankChargeValues(
             TMath::Mean(numberOfClusterPerEvent.begin(), numberOfClusterPerEvent.end()),
             TMath::StdDev(numberOfClusterPerEvent.begin(), numberOfClusterPerEvent.end()),
@@ -172,7 +221,9 @@ void CalculateMetrics::calculateTankCharge(
             TMath::Mean(meanClusterTime.begin(), meanClusterTime.end()),
             TMath::StdDev(meanClusterTime.begin(), meanClusterTime.end()));
 
-    t_runMetrics->setNumberOfClusterChargeBalanceAnomaly(numberOfClustersWithChargeBalanceOverOne);
+    t_runMetrics->setNumberOfClusterChargeBalanceAnomaly(numberOfClustersWithChargeBalanceOverTwo, numberOfClustersWithChargeBalanceOverTen,
+            static_cast<double>(numberOfClustersWithChargeBalanceOverTwo) / static_cast<double>(numberOfClusters),
+            static_cast<double>(numberOfClustersWithChargeBalanceOverTen) / static_cast<double>(numberOfClusters));
 
     t_runMetrics->setInfChargeNumbers(numberOfClusterWithMaxPEInf, numberOfClusterWithPEInf,
                                       numberOfClusterChargeBalanceInf, numberOfClusterChargeInf);
@@ -192,13 +243,16 @@ void CalculateMetrics::calculateTankCharge(
             static_cast<double>(numberOfClusterChargeBalanceNan) / static_cast<double>(numberOfClusters),
             static_cast<double>(numberOfClusterChargeNan) / static_cast<double>(numberOfClusters));
 
+
 }
+
 
 void CalculateMetrics::calculateMRDMetrics(
         const std::unique_ptr<NTupleInformation> &t_ntupleInformationOneRun,
         std::unique_ptr<RunMetrics> &t_runMetrics) {
     std::map<int, MRDInformation> mrdInformationOneRun {
             t_ntupleInformationOneRun->getMRDInformation() };
+    // ToDo: Move this to config variables?
     double late = 3800.0;
     double signalBegin = 1000.0;
     double signalEnd = 2500.0;
@@ -241,6 +295,15 @@ void CalculateMetrics::calculateMRDMetrics(
         } //end for loop clusters
 
     } // end for loop events
+    int numberOfMRDTracks = t_ntupleInformationOneRun->getGlobalNumberOfMRDTracks();
+    double numberOfMRDTracksPerEvent { 0.0 };
+    if(numberOfEvents){
+        numberOfMRDTracksPerEvent = static_cast<double>(numberOfMRDTracks) / static_cast<double>(numberOfEvents);
+    }
+    double numberOfMRDTracksPerCluster { 0.0 };
+    if(clustersAll){
+        numberOfMRDTracksPerCluster = static_cast<double>(numberOfMRDTracks) / static_cast<double>(clustersAll);
+    }
 
     double hitsInWindowVsAll = static_cast<double>(hitsInWindow) / static_cast<double>(hitsAll);
     double lateHitsVsAll = static_cast<double>(hitsLate) / static_cast<double>(hitsAll);
@@ -250,6 +313,7 @@ void CalculateMetrics::calculateMRDMetrics(
     double clusterVsEvents = static_cast<double>(clustersAll) / static_cast<double>(numberOfEvents);
     double hitsPerEvent = static_cast<double>(hitsAll) / static_cast<double>(numberOfEvents);
     t_runMetrics->setMRDMetrics(hitsInWindowVsAll, lateHitsVsAll, clusterVsEvents, hitsPerEvent,
-            numberOfHitsPerChannelPerEvent, clustersInWindowVsAll, lateClustersVsAll);
+            numberOfHitsPerChannelPerEvent, clustersInWindowVsAll, lateClustersVsAll, numberOfMRDTracksPerEvent, numberOfMRDTracksPerCluster);
+
 
 }

@@ -2,12 +2,12 @@
 # =======================================input=======================================
 # Input mode: Should be "Old" for files created with PhaseIITreeMaker, "New" for files created with the ANNIEEventTreeMaker or "Both". 
 # For both, two list files needs to be provided.
-inputMode Both
+inputMode New
 # The input file should be a list file containing all files to load. The paths should be absolute.
 # Command for finding and adding files to a file: find ~+ -type f -name "*.root" > /nfs/neutrino/data4/stenderm/PostDoc/ANNIETTR/RecoResults/files.list 
-# This of is for files created with the PhaseIITreeMaker
+# This is for files created with the PhaseIITreeMaker
 filenameOld DataSamples/ntuples/list.txt
-# This of is for files created with the ANNIEEventMaker
+# This is for files created with the ANNIEEventMaker
 filenameNew DataSamples/BeamClusterTrees/newlist.txt
 # Define the prefix that is written directly in front of the run number in the file names
 # Make sure that the sequence is unique to the file path and in front of the run number

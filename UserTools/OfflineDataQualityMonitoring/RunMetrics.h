@@ -21,6 +21,10 @@ class RunMetrics {
 public:
     RunMetrics(int t_runNumber, RunMode t_runMode);
     virtual ~RunMetrics();
+    template<typename T>
+    bool isKeyPresentInMap(const std::map<int, T>& t_theMap, int t_key){
+        return t_theMap.count(t_key);
+    }
     void setTankChargeValues(double t_meanClusterNumber, double t_stdClusterNumber,
                              double t_meanChargePerCluster, double t_stdChargePerCluster,
                              double t_meanChargePerEventInClusters,
@@ -37,8 +41,14 @@ public:
                               double t_stdChargeBalancePerCluster);
     void setTankTimeValues(double t_meanTimePerCluster, double t_stdTimePerCluster,
                            double t_meanOfMeanTimePerEvent, double t_stdOfMeanTimePerEvent);
-    void setNumberOfClusterChargeBalanceAnomaly(int t_numberOfClusterChargeBalanceAnomaly) {
-        m_number_of_charge_balance_anomalies = t_numberOfClusterChargeBalanceAnomaly;
+    void setNumberOfClusterChargeBalanceAnomaly(int t_numberOfClusterChargeBalancesAboveTwo, int t_numberOfClusterChargeBalancesOverTen,
+                                                double t_ratioOfClusterChargeBalancesAboveTwo, double t_ratioOfClusterChargeBalancesAboveTen) {
+        m_number_of_charge_balances_above_two = t_numberOfClusterChargeBalancesAboveTwo;
+        m_number_of_charge_balances_above_ten = t_numberOfClusterChargeBalancesOverTen;
+
+        m_ratio_of_charge_balances_above_two = t_ratioOfClusterChargeBalancesAboveTwo;
+        m_ratio_of_charge_balances_above_ten = t_ratioOfClusterChargeBalancesAboveTen;
+
     }
     void setInfChargeNumbers(int t_numberOfInfMaxPE, int t_numberOfInfPE,
                              int t_numberOfInfChargeBalance, int t_numberOfInfCharge);
@@ -51,10 +61,15 @@ public:
 
     void setNanChargeRatios(double t_ratioOfNanMaxPE, double t_ratioOfNanPE,
                             double t_ratioOfNanChargeBalance, double t_ratioOfNanCharge);
+
+    void setTankTubeValues(int t_tubeID, double t_meanNumberOfHitsPerEvent, double t_stdNumberOfHitsPerEvent,
+                                         double t_meanChargePerEvent, double t_stdChargePerEvent,
+                                         double t_meanChargePEPerEvent, double t_stdChargePEPerEvent);
     void setMRDMetrics(double t_hitsInWindowVsAllHits, double t_lateHitsVsAllHits,
                        double t_clustersPerEvent, double t_HitsPerEvent,
                        std::map<int, double> t_hitsPerEventPerChannel,
-                       double t_clustersInWindowVsAllClusters, double t_lateClustersVsAllClusters);
+                       double t_clustersInWindowVsAllClusters, double t_lateClustersVsAllClusters,
+                       double t_tracksPerEvent, double t_tracksPerCluster);
 
     void printTankCharge();
     int getRunNumber() const {
@@ -161,8 +176,20 @@ public:
         return m_clusters_in_signal_window_vs_all_clusters;
     }
 
-    int getNumberOfChargeBalanceAnomalies() const {
-        return m_number_of_charge_balance_anomalies;
+    int getNumberOfChargeBalancesAboveTwo() const {
+        return m_number_of_charge_balances_above_two;
+    }
+
+    int getNumberOfChargeBalancesAboveTen() const {
+        return m_number_of_charge_balances_above_ten;
+    }
+
+    double getRatioOfChargeBalancesAboveTwo() const {
+        return m_ratio_of_charge_balances_above_two;
+    }
+
+    double getRatioOfChargeBalancesAboveTen() const {
+        return m_ratio_of_charge_balances_above_ten;
     }
 
     int getNumberOfInfChargeBalance() const {
@@ -229,6 +256,62 @@ public:
         return m_ratio_of_nan_pe;
     }
 
+    double getTracksPerEvent() const{
+        return m_tracks_per_event;
+    }
+
+    double getTracksPerCluster() const{
+        return m_tracks_per_cluster;
+    }
+
+    const std::map<int, double>& getMeanChargePePerEventPerChannelTank() const {
+        return m_mean_charge_pe_per_event_per_channel_tank;
+    }
+
+    const std::map<int, double>& getMeanChargePerEventPerChannelTank() const {
+        return m_mean_charge_per_event_per_channel_tank;
+    }
+
+    const std::map<int, double>& getMeanHitsPerEventPerChannelTank() const {
+        return m_mean_hits_per_event_per_channel_tank;
+    }
+
+    const std::map<int, double>& getStdChargePePerEventPerChannelTank() const {
+        return m_std_charge_pe_per_event_per_channel_tank;
+    }
+
+    const std::map<int, double>& getStdChargePerEventPerChannelTank() const {
+        return m_std_charge_per_event_per_channel_tank;
+    }
+
+    const std::map<int, double>& getStdHitsPerEventPerChannelTank() const {
+        return m_std_hits_per_event_per_channel_tank;
+    }
+
+    const double& getMeanChargePePerEventPerChannelTank(int t_tubeID) const {
+        return m_mean_charge_pe_per_event_per_channel_tank.at(t_tubeID);
+    }
+
+    const double& getMeanChargePerEventPerChannelTank(int t_tubeID) const {
+        return m_mean_charge_per_event_per_channel_tank.at(t_tubeID);
+    }
+
+    const double& getMeanHitsPerEventPerChannelTank(int t_tubeID) const {
+        return m_mean_hits_per_event_per_channel_tank.at(t_tubeID);
+    }
+
+    const double& getStdChargePePerEventPerChannelTank(int t_tubeID) const {
+        return m_std_charge_pe_per_event_per_channel_tank.at(t_tubeID);
+    }
+
+    const double& getStdChargePerEventPerChannelTank(int t_tubeID) const {
+        return m_std_charge_per_event_per_channel_tank.at(t_tubeID);
+    }
+
+    const double& getStdHitsPerEventPerChannelTank(int t_tubeID) const {
+        return m_std_hits_per_event_per_channel_tank.at(t_tubeID);
+    }
+
 private:
     int m_run_number { };
     size_t m_number_of_events { };
@@ -265,7 +348,11 @@ private:
     double m_mean_mean_time_per_event { };
     double m_std_mean_time_per_event { };
 
-    int m_number_of_charge_balance_anomalies { };
+    int m_number_of_charge_balances_above_two { };
+    int m_number_of_charge_balances_above_ten { };
+
+    double m_ratio_of_charge_balances_above_two { };
+    double m_ratio_of_charge_balances_above_ten { };
 
     int m_number_of_inf_charge_balance { };
     int m_number_of_inf_max_pe { };
@@ -287,6 +374,15 @@ private:
     double m_ratio_of_nan_pe { };
     double m_ratio_of_nan_charge { };
 
+    /// Tank Individual Tubes
+    std::map<int, double> m_mean_hits_per_event_per_channel_tank { };
+    std::map<int, double> m_std_hits_per_event_per_channel_tank { };
+    std::map<int, double> m_mean_charge_per_event_per_channel_tank { };
+    std::map<int, double> m_std_charge_per_event_per_channel_tank { };
+    std::map<int, double> m_mean_charge_pe_per_event_per_channel_tank { };
+    std::map<int, double> m_std_charge_pe_per_event_per_channel_tank { };
+
+
     RunMode m_run_mode { };
 
     ///MRD Values
@@ -298,6 +394,8 @@ private:
     double m_clusters_per_event { };
     double m_hits_per_event { };
     std::map<int, double> m_hits_per_event_per_channel { };
+    double m_tracks_per_event { };
+    double m_tracks_per_cluster { };
 
 };
 
